@@ -1,0 +1,9 @@
+parameters:
+	database:
+		driver: mysql
+		host: 127.0.0.1
+		username: root
+		password: asqw
+		database: invoice
+		lazy: true
+		profiler: true

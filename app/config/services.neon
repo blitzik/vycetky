@@ -1,0 +1,116 @@
+services:
+
+	listingPresenter:
+		class: App\FrontModule\Presenters\ListingPresenter
+		setup:
+			- setCompanyParameters(%company%)
+
+	nette.latteFactory:
+		setup:
+			- addFilter(null, [Filters\FilterLoader(), 'loader'])
+
+	- App\Model\Components\ListingFormFactory
+
+	itemUpdateFormFactory:
+		class: App\Model\Components\ItemUpdateFormFactory(%defaultItemTime%)
+
+	filterControlFactory:
+		implement: App\Model\Components\IFilterControlFactory
+
+	listingActionMenuControlFactory:
+		implement: App\Model\Components\IListingActionsMenuControlFactory
+		parameters: [App\Model\Entities\Listing listing]
+		arguments: [%listing%]
+
+	messagesTableControlFactory:
+		implement: App\Model\Components\IMessagesTableControlFactory
+		parameters: [MessagesLoaders\IMessagesLoader loader]
+		arguments: [%loader%]
+
+	itemsTableControlFactory:
+		implement: App\Model\Components\ItemsTable\IItemsTableControlFactory
+		parameters: [DateTime period]
+		arguments: [%period%]
+
+	listingTableControlFactory:
+		implement: App\Model\Components\ListingTable\IListingTableControlFactory
+		parameters: [App\Model\Entities\Listing listing]
+		arguments: [%listing%]
+
+	massItemChangeControlFactory:
+		implement: App\Model\Components\IMassItemsChangeControlFactory
+		parameters: [App\Model\Entities\Listing listing]
+		arguments: [%listing%]
+
+	sharingListingControlFactory:
+		implement: App\Model\Components\ISharingListingControlFactory
+		parameters: [App\Model\Entities\Listing listing]
+		arguments: [%listing%]
+
+	listingFormControlFactory:
+		implement: App\Model\Components\IListingFormControlFactory
+		parameters: [listing]
+		arguments: [%listing%]
+
+	listingDescriptionControlFactory:
+		implement: App\Model\Components\IListingDescriptionControlFactory
+		parameters: [\DateTime period, description]
+		arguments: [%period%, %description%]
+
+	listingsOverviewControlFactory:
+		implement: App\Model\Components\IListingsOverviewControlFactory
+		parameters: [array filterParams]
+		arguments: [%filterParams%]
+
+	- \Components\IPaginatorFactory
+
+	# LeanMapper
+	- App\Model\Mapper\StandardMapper
+	- \EntityFactory
+
+	# Repositories
+	- App\Model\Repositories\UserMessageRepository
+	- App\Model\Repositories\ListingItemRepository
+	- App\Model\Repositories\WorkedHoursRepository
+	- App\Model\Repositories\InvitationRepository
+	- App\Model\Repositories\LocalityRepository
+	- App\Model\Repositories\ListingRepository
+	- App\Model\Repositories\MessageRepository
+	- App\Model\Repositories\UserRepository
+
+	# Transaction class
+	- Transaction
+
+	# Service layers
+	- App\Model\Services\LocalityService
+	- App\Model\Services\ItemService
+
+	# Facades
+	- App\Model\Facades\MessagesFacade
+	- App\Model\Facades\LocalityFacade
+	- App\Model\Facades\ListingFacade
+	- App\Model\Facades\UserManager
+	- App\Model\Facades\ItemFacade
+
+	# Messages Loaders
+	- MessagesLoaders\ReceivedUnreadMessagesLoader
+	- MessagesLoaders\ReceivedReadMessagesLoader
+	- MessagesLoaders\SentMessagesLoader
+
+	# Authenticators
+	- App\Model\Authenticators\UserAuthenticator
+
+	# Notifications
+
+		#Profile
+	- App\Model\Notifications\EmailNotifier
+
+	- App\Model\Notifications\SharedListingNotification
+
+	# Database Backup
+	databaseBackup:
+		class: DatabaseBackup(%database%)
+
+	# Router
+	- App\RouterFactory
+	router: @App\RouterFactory::createRouter

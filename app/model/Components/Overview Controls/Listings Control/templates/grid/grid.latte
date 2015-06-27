@@ -1,0 +1,58 @@
+{define col-year}
+<td>
+    {$row->year}
+</td>
+{/define}
+
+{define col-month}
+<td>
+    {$row->month|monthNameByNumber}
+</td>
+{/define}
+
+
+{define col-description}
+<td>
+    <a href="{plink Listing:detail, 'id' => $row->listingID}">
+    {if $row->description}{$row->description}{else}Bez popisu{/if}</a>
+</td>
+{/define}
+
+
+{define col-totalWorkedHours}
+<td>
+    {$row->totalWorkedHours|toTimeWithComma:true}
+</td>
+{/define}
+
+
+{define row-actions}
+
+{if !$row->isActual()}
+    <a href="{plink Listing:remove, 'id'=>$row->listingID,
+                                    'backlink'=>$presenter->storeRequest()}"
+       class="btn btn-red btn-small" title="Odstranit výčetku">Odstranit</a>
+{/if}
+
+{if !$row->isActual()}
+    <a href="{plink Listing:copy, 'id'=>$row->listingID}"
+       class="btn btn-copy btn-small" title="Vytvořit kopii výčetky">Kopie</a>
+{/if}
+
+
+    <a href="{plink Listing:edit, 'id'=>$row->listingID}"
+       class="btn btn-blue btn-small" title="Upravit výčetku">Upravit</a>
+
+
+
+{if $row->isActual()}
+    <a href="{plink Item:edit, 'id'=>$row->listingID,
+                               'day'=>date('j')}"
+       class="btn btn-violet btn-small" title="Upravit výčetku">Nastavit aktuální den</a>
+
+{/if}
+{/define}
+
+{redefine table-open-tag}
+    <table class="table t-classic t-overview">
+{/redefine}

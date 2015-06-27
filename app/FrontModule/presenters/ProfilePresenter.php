@@ -1,0 +1,192 @@
+<?php
+
+namespace App\FrontModule\Presenters;
+
+use App\Model\Entities\Invitation;
+use Exceptions\Runtime\InvitationAlreadyExistsException;
+use App\Model\Notifications\EmailNotifier;
+use App\Model\Facades\UserManager;
+use Nette\Application\UI\ITemplate;
+use Nette\InvalidStateException;
+use \Nette\Application\UI\Form;
+use Tracy\Debugger;
+
+class ProfilePresenter extends SecurityPresenter
+{
+    /**
+     * @var \DatabaseBackup
+     * @inject
+     */
+    public $databaseBackup;
+
+    /**
+     * @var UserManager
+     * @inject
+     */
+    public $userManager;
+
+    /**
+     * @var EmailNotifier
+     * @inject
+     */
+    public $emailNotifier;
+
+
+    /*
+     * --------------------
+     * ----- OVERVIEW -----
+     * --------------------
+     */
+
+    public function actionDetail()
+    {
+        $user = $this->userManager->getUserByID($this->user->id);
+        if (isset($user->name)) {
+            $this['userForm']['name']->setDefaultValue($user->name);
+        }
+    }
+
+    public function renderDetail()
+    {
+        $result = $this->userManager->getTotalWorkedStatistics($this->user->id);
+
+        if (empty($result)) {
+            $workedDays = 0;
+            $totalWorkedHours = 0;
+        } else {
+            $workedDays = $result['workedDays'];
+
+            $totalWorkedHours = $result['workedHours'];
+        }
+
+        $this->template->totalWorkedDays = $workedDays;
+        $this->template->totalWorkedHours = new \InvoiceTime((int)$totalWorkedHours);
+
+    }
+
+    protected function createComponentBackupDatabaseForm()
+    {
+        $form = new Form();
+
+        $form->addSubmit('backup', 'Provést zálohu')
+                ->getControlPrototype()
+                ->onClick = 'return confirm(\'Skutečně chcete provést zálohu databáze?\');';
+
+        $form->onSuccess[] = [$this, 'processBackup'];
+
+        $form->addProtection();
+
+        return $form;
+    }
+
+    public function processBackup(Form $form)
+    {
+        if ($this->user->isInRole('administrator')) {
+            try {
+                $this->databaseBackup
+                    ->save(WWW_DIR . '/app/backup/' . date('Y-m-d H-i') . '.sql');
+
+                $this->flashMessage('Záloha databáze byla úspěšně provedena!', 'success');
+
+            } catch (\Exception $e) {
+                $this->flashMessage($e->getMessage(), 'error');
+            }
+        } else {
+            $this->flashMessage('Nemáte dostatečná oprávnění k provedení akce.', 'warning');
+        }
+
+        $this->redirect('this');
+    }
+
+    protected function createComponentSendKeyForm()
+    {
+        $form = new Form();
+
+        $form->addText('email', 'Odeslat pozvánku na adresu:', 22)
+                ->setRequired('Zadejte prosím E-mail, na který se má pozvánka odeslat.')
+                ->addRule(Form::EMAIL, 'Zadejte platnou E-Mailovou adresu.');
+
+        $form->addSubmit('send', 'Odeslat pozvánku');
+
+        $form->onSuccess[] = callback($this, 'processSendKey');
+
+        return $form;
+    }
+
+    public function processSendKey(Form $form)
+    {
+        $value = $form->getValues();
+
+        try {
+            $this->userManager->findUserByEmail($value['email']);
+            $this->flashMessage(
+                'Pozvánku nelze odeslat. Uživatel s E-Mailem ' . $value['email'] . ' je již zaregistrován.',
+                'warning'
+            );
+            $this->redirect('this');
+
+        } catch (\Exceptions\Runtime\UserNotFoundException $u) {
+
+            try {
+                $invitation = $this->userManager->insertInvitation($value['email']);
+            } catch (InvitationAlreadyExistsException $i) {
+                $this->flashMessage(
+                    'Pozvánka již byla odeslána uživateli s E-mailem ' .$value['email'],
+                    'warning'
+                );
+                $this->redirect('this');
+            }
+        }
+
+        try {
+            $this->emailNotifier->send(
+                'Výčetkový systém <vycetkovy-system@alestichava.cz>',
+                $invitation->email,
+                function (ITemplate $template, Invitation $invitation, $senderName) {
+                    $template->setFile(__DIR__ . '/../../model/Notifications/templates/invitation.latte');
+                    $template->invitation = $invitation;
+                    $template->username = $senderName;
+
+                },
+                [$invitation, $this->getUser()->getIdentity()->username]
+            );
+
+            $this->flashMessage(
+                'Registrační pozvánka byla odeslána',
+                'success'
+            );
+
+        } catch (InvalidStateException $e) {
+            Debugger::log($e, Debugger::ERROR);
+            $this->flashMessage(
+                'Registrační pozvánku nebylo možné odeslat. Zkuste to prosím později.',
+                'error'
+            );
+        }
+
+        $this->redirect('this');
+    }
+
+    protected function createComponentUserForm()
+    {
+        $form = new Form();
+
+        $form->addText('name', 'Jméno', 13, 70);
+        $form->addSubmit('savename', 'Uložit');
+
+        $form->onSuccess[] = [$this, 'processSaveWholeName'];
+
+        return $form;
+    }
+
+    public function processSaveWholeName(Form $form, $values)
+    {
+        $user = $this->userManager->getUserByID($this->user->id);
+        $user->name = $values['name'];
+
+        $this->userManager->saveUser($user);
+
+        $this->flashMessage('Vaše jméno bylo úspěšně změněno.', 'success');
+        $this->redirect('this');
+    }
+}

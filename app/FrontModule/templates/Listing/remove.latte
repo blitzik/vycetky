@@ -1,0 +1,41 @@
+{block content}
+
+{control listingActionsMenu}
+
+<h2 n:block="title">Odstranění výčetky</h2>
+
+<div class="box box-red">
+<table>
+    <tr>
+        <td colspan="2">
+            Skutečně si přejete <b>odstranit</b> vámi zvolenou výčetku?
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <b>{$listing->period|listingMonthYear}</b> |
+                {if $listing->description}
+                    {$listing->description}
+                {else}
+                    Bez popisu
+                {/if}
+        </td>
+    </tr>
+
+    {form deleteListingForm}
+        <tr><td>{input delete}</td><td>{input cancel}</td></tr>
+    {/form deleteListingForm}
+
+</table>
+</div>
+
+<div class="box box-hint">
+    <h3>Odstranění výčetky</h3>
+
+    <p>Po kliknutí na tlačítko <strong>Odstranit výčetku</strong> se
+      výčetka nenávratně vymaže ze systému. Smazáním výčetky
+      taktéž přijdete o všechny položky, které tato výčetka obsahovala.</p>
+</div>
+
+{/block}
