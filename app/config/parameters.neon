@@ -5,6 +5,3 @@ parameters:
 		lunch: '1'
 		workedHours: '9'
 		otherHours: '0'
-
-	company:
-		name: 'Company name'

@@ -7,3 +7,6 @@ parameters:
 		database: invoice
 		lazy: true
 		profiler: true
+
+	company:
+		name: 'Company name'
