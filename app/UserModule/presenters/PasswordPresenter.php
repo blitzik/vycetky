@@ -106,7 +106,7 @@ class PasswordPresenter extends BasePresenter
             $this->flashMessage('<strong>Chyba!</strong> Uživatel s E-mailem <strong>' . $email . '</strong> se v
                                  systému nenachází a proto není možné změnit heslo spojené s tímto E-mailem. V případě,
                                  že jste si jisti tím, že se v systému tento E-mail nacházel, zkuste pro více informací
-                                 kontaktovat správce na adrese <strong>admin@alestichava.cz</strong>.', 'error');
+                                 kontaktovat správce na adrese <strong>'.$this->systemEmail.'</strong>.', 'error');
             $this->redirect('Password:reset');
 
         }
@@ -154,14 +154,17 @@ class PasswordPresenter extends BasePresenter
         $form->addPassword('password', 'Nové heslo:')
                 ->setRequired('Vyplňte své heslo.')
                 ->addRule(Form::MIN_LENGTH, 'Heslo musí mít alespoň %d znaků.', 5)
-                ->setAttribute('placeholder', 'Zadejte nové heslo');
+                ->setAttribute('placeholder', 'Zadejte nové heslo')
+                ->setHtmlId('password-input');;
 
-        $form->addPassword('password2', 'Kontrola:')
+        $form->addPassword('password2', 'Kontrola hesla:')
                 ->setRequired('Vyplňte kontrolu hesla.')
                 ->addRule(Form::EQUAL, 'Zadaná hesla se musí shodovat.', $form['password'])
-                ->setAttribute('placeholder', 'Znovu zadejte své heslo');
+                ->setAttribute('placeholder', 'Znovu zadejte své heslo')
+                ->setHtmlId('password-control-input');
 
-        $form->addSubmit('save', 'Změnit heslo');
+        $form->addSubmit('save', 'Změnit heslo')
+             ->setHtmlId('password-save-button');
 
         $form->onSuccess[] = callback($this, 'processChangePassword');
 

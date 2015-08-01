@@ -142,7 +142,8 @@ class AccountPresenter extends BasePresenter
                 ->addRule(Form::EMAIL, 'Zadejte prosim platný formát E-mailové adresy.');*/
 
         $form->addSubmit('reg', 'Zaregistrovat uživatele')
-                ->setOmitted();
+             ->setOmitted()
+             ->setHtmlId('password-save-button');
 
         $form->onSuccess[] = callback($this, 'processUserRegistration');
 

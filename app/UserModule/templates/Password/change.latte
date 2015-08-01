@@ -1,5 +1,7 @@
 {block scripts}
-<script src="{$basePath}/js/placeholders.js"></script>
+    {include parent}
+    <script src="{$basePath}/js/placeholders.js"></script>
+    <script src="{$basePath}/js/passwordValidation.js"></script>
 {/block}
 
 {block content}
@@ -14,17 +16,13 @@
     </p>
 
     <div class="box">
-
-            <table>
-
-                <tr><td>{label username /} {input username}</td></tr>
-                <tr><td>{label email /} {input email}</td></tr>
-                <tr><td>{label password /} {input password}</td></tr>
-                <tr><td>{label password2 /} {input password2}</td></tr>
-                <tr><td>{input save}</td></tr>
-
-            </table>
-
+        <table>
+            <tr><td>{label username /} {input username}</td></tr>
+            <tr><td>{label email /} {input email}</td></tr>
+            <tr><td>{label password}<span id="pass-message">Uživatelské heslo:</span>{/label} {input password}</td></tr>
+            <tr><td>{label password2}<span id="pass-control-message">Kontrola Hesla:</span>{/label} {input password2}</td></tr>
+            <tr><td>{input save}</td></tr>
+        </table>
     </div>
 
     <div class="hint">
