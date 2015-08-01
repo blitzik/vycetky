@@ -83,6 +83,9 @@ class MergePresenter extends SecurityPresenter
 
     }
 
+    /**
+     * @Actions search
+     */
     protected function createComponentListingsSelector()
     {
         $form = new Form();
@@ -167,6 +170,9 @@ class MergePresenter extends SecurityPresenter
         }
     }
 
+    /**
+     * @Actions listing
+     */
     protected function createComponentListingsMergeForm()
     {
         $form = new Form();

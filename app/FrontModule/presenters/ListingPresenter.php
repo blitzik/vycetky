@@ -10,6 +10,7 @@ use App\Model\Components\ISharingListingControlFactory;
 use App\Model\Components\IListingFormControlFactory;
 use App\Model\Components\IFilterControlFactory;
 use App\Model\Components\ListingFormFactory;
+use Nette\Forms\Controls\SubmitButton;
 use App\Model\Facades\MessagesFacade;
 use App\Model\Facades\ItemFacade;
 use App\Model\Facades\UserManager;
@@ -17,7 +18,6 @@ use Nette\Application\UI\Form;
 use App\Model\Time\TimeUtils;
 use Exceptions\Runtime;
 use App\Model\Entities;
-use Nette\Forms\Controls\SubmitButton;
 
 class ListingPresenter extends SecurityPresenter
 {
@@ -105,7 +105,9 @@ class ListingPresenter extends SecurityPresenter
 
     private $numberOfMessages;
 
-
+    /**
+     * @Actions detail, pdfGeneration, edit, copy, massItemsChange, share, remove
+     */
     protected function createComponentListingActionsMenu()
     {
         $comp = $this->listingActionsMenuControlFactory->create($this->listing);
@@ -136,6 +138,9 @@ class ListingPresenter extends SecurityPresenter
         $this->template->numberOfMessages = $this->numberOfMessages;
     }
 
+    /**
+     * @Actions overview
+     */
     protected function createComponentListingsOverview()
     {
         $comp = $this->listingsOverviewFactory
@@ -149,6 +154,9 @@ class ListingPresenter extends SecurityPresenter
         return $comp;
     }
 
+    /**
+     * @Actions overview
+     */
     protected function createComponentFilter()
     {
         return $this->filterControlFactory->create();
@@ -178,6 +186,9 @@ class ListingPresenter extends SecurityPresenter
     {
     }
 
+    /**
+     * @Actions add, edit
+     */
     protected function createComponentListingForm()
     {
         return $this->listingFormControlFactory->create($this->listing);
@@ -199,11 +210,20 @@ class ListingPresenter extends SecurityPresenter
         $this->template->listing = $this->listing;
     }
 
+    /**
+     * @Actions remove
+     */
     protected function createComponentDeleteListingForm()
     {
         $form = new Form();
 
+        $form->addText('check', 'Pro smazání výčetky napište do pole "smazat".')
+                ->addRule(Form::FILLED, 'Kontrola musí být vyplněna.')
+                ->addRule(Form::EQUAL, 'Pro smazání výčetky musí být vyplňeno správné kontrolní slovo.', 'smazat')
+                ->setHtmlId('listing-check-input');
+
         $form->addSubmit('delete', 'Odstranit výčetku')
+                ->setHtmlId('listing-remove-button')
                 ->onClick[] = callback($this, 'processDeleteListing');
 
         $form->addSubmit('cancel', 'Vrátit se zpět')
@@ -263,6 +283,9 @@ class ListingPresenter extends SecurityPresenter
         $this->template->listing = $this->listing;
     }
 
+    /**
+     * @Actions detail
+     */
     protected function createComponentListingItemsTable()
     {
         $comp = $this->listingTableControlFactory->create($this->listing);
@@ -294,6 +317,9 @@ class ListingPresenter extends SecurityPresenter
     {
     }
 
+    /**
+     * @Actions copy
+     */
     protected function createComponentSimpleCopyForm()
     {
         $form = new Form();
@@ -357,6 +383,9 @@ class ListingPresenter extends SecurityPresenter
 
     }
 
+    /**
+     * @Actions massItemsChange
+     */
     protected function createComponentMassItemChangeTable()
     {
         $comp = $this->massItemChangeControlFactory->create($this->listing);
@@ -384,6 +413,9 @@ class ListingPresenter extends SecurityPresenter
 
     }
 
+    /**
+     * @Actions share
+     */
     protected function createComponentListingTableForSharing()
     {
         return $this->sharingListingTableControlFactory->create($this->listing);
@@ -398,9 +430,8 @@ class ListingPresenter extends SecurityPresenter
     public function actionPdfGeneration($id)
     {
         $this->listing = $this->getEntireListingByID($id);
-        $user = $this->userManager->getUserByID($this->user->id);
 
-        $this['listingResultSettings']['name']->setDefaultValue($user->name);
+        $this['listingResultSettings']['name']->setDefaultValue($this->user->getIdentity()->name);
     }
 
     public function renderPdfGeneration($id)
@@ -409,6 +440,9 @@ class ListingPresenter extends SecurityPresenter
         $this->template->_form = $this['listingResultSettings'];
     }
 
+    /**
+     * @Actions pdfGeneration
+     */
     protected function createComponentListingResultSettings()
     {
         $form = new Form();

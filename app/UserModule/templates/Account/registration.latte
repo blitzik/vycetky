@@ -1,4 +1,5 @@
 {block scripts}
+    {include parent}
 <script src="{$basePath}/js/placeholders.js"></script>
 {/block}
 
@@ -13,8 +14,8 @@
         <div class="box">
             <table>
                 <tr><td>{label username /} {input username}</td></tr>
-                <tr><td>{label password /} {input password}</td></tr>
-                <tr><td>{label pass2 /} {input pass2}</td></tr>
+                <tr><td>{label password}<span id="pass-message">Uživatelské heslo:</span>{/label} {input password}</td></tr>
+                <tr><td>{label pass2}<span id="pass-control-message">Kontrola Hesla:</span>{/label} {input pass2}</td></tr>
                 <tr><td>{label email /} {input email}</td></tr>
                 <tr><td>{input reg}</td></tr>
             </table>
@@ -32,4 +33,43 @@
         </div>
         {/form registrationForm}
 </div>
+
+<script>
+$(function() {
+    var pass = $('#password-input');
+    var passMessage = $('#pass-message');
+    var passControl = $('#password-control-input');
+    var controlMessage = $('#pass-control-message');
+
+    function arePasswordsEqual(pass, pass2)
+    {
+        if (pass != pass2) {
+           controlMessage.text('Hesla se neshodují').css('color', '#E81554');
+        } else {
+            controlMessage.text('Hesla souhlasí').css('color', '#72D62F');
+        }
+    }
+
+    pass.on('blur', function () {
+        var self = $(this);
+        if (self.val().length < 5) {
+            passMessage.text('Heslo musí mít nejméně 5 znaků').css('color', '#ED5C5C');
+            controlMessage.text('Kontrola hesla:').css('color', '');
+        } else {
+            passMessage.text('Uživatelské heslo:').css('color', '');
+            if (passControl.val().length > 0) {
+                arePasswordsEqual($(this).val(), passControl.val());
+            }
+        }
+    });
+
+    passControl.on('blur', function () {
+        var self = $(this);
+
+        if (self.val().length > 0 && pass.val().length >= 5) {
+            arePasswordsEqual(pass.val(), self.val());
+        }
+    });
+});
+</script>
 {/block}

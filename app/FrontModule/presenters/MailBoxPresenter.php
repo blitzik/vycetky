@@ -3,10 +3,10 @@
 namespace App\FrontModule\Presenters;
 
 use App\Model\Components\IMessagesTableControlFactory;
-use Exceptions\Runtime\MessageLengthException;
 use MessagesLoaders\ReceivedUnreadMessagesLoader;
 use Exceptions\Runtime\MessageNotFoundException;
 use MessagesLoaders\ReceivedReadMessagesLoader;
+use Exceptions\Runtime\MessageLengthException;
 use MessagesLoaders\SentMessagesLoader;
 use App\Model\Facades\MessagesFacade;
 use MessagesLoaders\IMessagesLoader;
@@ -102,6 +102,9 @@ class MailBoxPresenter extends SecurityPresenter
 
     }
 
+    /**
+     * @Actions receivedUnread, receivedRead, sent
+     */
     public function createComponentMessagesTable()
     {
         $comp = $this->messagesTableControlFactory
@@ -149,6 +152,9 @@ class MailBoxPresenter extends SecurityPresenter
 
     }
 
+    /**
+     * @Actions newMessage
+     */
     protected function createComponentNewMessageForm()
     {
         $form = new Form();

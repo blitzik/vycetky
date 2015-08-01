@@ -30,6 +30,31 @@ abstract class SecurityPresenter extends Nette\Application\UI\Presenter
         $this->currentDate = new \DateTime();
     }
 
+    protected function createComponent($name)
+    {
+        $ucname = ucfirst($name);
+        $method = 'createComponent' . $ucname;
+
+        $presenterReflection = $this->getReflection();
+        if ($presenterReflection->hasMethod($method)) {
+            $methodReflection = $presenterReflection->getMethod($method);
+            $this->checkRequirements($methodReflection);
+
+            if ($methodReflection->hasAnnotation('Actions')) {
+                $actions = explode(',', $methodReflection->getAnnotation('Actions'));
+                foreach ($actions as $key => $action) {
+                    $actions[$key] = trim($action);
+                }
+
+                if (!empty($actions) and !in_array($this->getAction(), $actions)) {
+                    throw new Nette\Application\ForbiddenRequestException("Creation of component '$name' is forbidden for action '$this->action'.");
+                }
+            }
+        }
+
+        return parent::createComponent($name);
+    }
+
     public function beforeRender() {
         parent::beforeRender();
 

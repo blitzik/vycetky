@@ -140,6 +140,9 @@ class ItemPresenter extends SecurityPresenter
         }
     }
 
+    /**
+     * @Actions edit
+     */
     protected function createComponentItemForm()
     {
         $form = $this->itemUpdateFormFactory->create();

@@ -1,9 +1,27 @@
 services:
 
+	# Presenters
 	listingPresenter:
 		class: App\FrontModule\Presenters\ListingPresenter
 		setup:
 			- setCompanyParameters(%company%)
+
+	helpPresenter:
+		class: App\FrontModule\Presenters\HelpPresenter
+		setup:
+			- setemails(%emails%)
+
+	profilePresenter:
+		class: App\FrontModule\Presenters\ProfilePresenter
+		setup:
+			- setEmails(%emails%)
+
+	passwordPresenter:
+		class: App\UserModule\Presenters\PasswordPresenter
+		setup:
+			- setSystemEmail(%emails.system%)
+
+	# -----------------
 
 	nette.latteFactory:
 		setup:
@@ -11,6 +29,7 @@ services:
 
 	- App\Model\Components\ListingFormFactory
 
+	# Factories
 	itemUpdateFormFactory:
 		class: App\Model\Components\ItemUpdateFormFactory(%defaultItemTime%)
 

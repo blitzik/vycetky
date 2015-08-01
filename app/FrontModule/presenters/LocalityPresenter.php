@@ -43,6 +43,9 @@ class LocalityPresenter extends SecurityPresenter
         $this->template->numberOfLocalities = $this->localityFacade->getNumberOfUserLocalities();
     }
 
+    /**
+     * @Actions itemAutocomplete
+     */
     protected function createComponentLocalitiesTableForm()
     {
         $form = new Form();

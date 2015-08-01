@@ -126,13 +126,15 @@ class AccountPresenter extends BasePresenter
         $form->addpassword('password', 'Uživatelské heslo:')
                 ->setRequired('Vyplňte své heslo prosím.')
                 ->addRule(Form::MIN_LENGTH, 'Heslo musí mít alespoň %d znaků.', 5)
-                ->setAttribute('placeholder', 'Vyplňte heslo');
+                ->setAttribute('placeholder', 'Vyplňte heslo')
+                ->setHtmlId('password-input');
 
         $form->addPassword('pass2', 'Kontrola hesla:')
                 ->setRequired('Vyplňte kontrolu vašeho hesla prosím.')
                 ->addRule(Form::EQUAL, 'Zadaná hesla se musí shodovat.', $form['password'])
                 ->setOmitted()
-                ->setAttribute('placeholder', 'Zadejte heslo znovu');
+                ->setAttribute('placeholder', 'Zadejte heslo znovu')
+                ->setHtmlId('password-control-input');
 
         $form->addText('email', 'E-mail:')
                 ->getControlPrototype()->readonly = 'readonly';

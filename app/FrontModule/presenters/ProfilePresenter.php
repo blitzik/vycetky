@@ -2,13 +2,16 @@
 
 namespace App\FrontModule\Presenters;
 
-use App\Model\Entities\Invitation;
 use Exceptions\Runtime\InvitationAlreadyExistsException;
 use App\Model\Notifications\EmailNotifier;
-use App\Model\Facades\UserManager;
 use Nette\Application\UI\ITemplate;
+use App\Model\Entities\Invitation;
+use App\Model\Facades\UserManager;
 use Nette\InvalidStateException;
 use \Nette\Application\UI\Form;
+use Nette\Mail\IMailer;
+use Nette\Mail\SendmailMailer;
+use Nette\Mail\Message;
 use Tracy\Debugger;
 
 class ProfilePresenter extends SecurityPresenter
@@ -31,6 +34,21 @@ class ProfilePresenter extends SecurityPresenter
      */
     public $emailNotifier;
 
+    /**
+     * @var IMailer
+     * @inject
+     */
+    public $mailer;
+
+    /**
+     * @var array ['admin' => ... , 'system' => ...]
+     */
+    private $emails;
+
+    public function setEmails(array $emails)
+    {
+        $this->emails = $emails;
+    }
 
     /*
      * --------------------
@@ -40,9 +58,9 @@ class ProfilePresenter extends SecurityPresenter
 
     public function actionDetail()
     {
-        $user = $this->userManager->getUserByID($this->user->id);
-        if (isset($user->name)) {
-            $this['userForm']['name']->setDefaultValue($user->name);
+        $name = $this->user->getIdentity()->name;
+        if (isset($name)) {
+            $this['userForm']['name']->setDefaultValue($name);
         }
     }
 
@@ -64,6 +82,9 @@ class ProfilePresenter extends SecurityPresenter
 
     }
 
+    /**
+     * @Actions detail
+     */
     protected function createComponentBackupDatabaseForm()
     {
         $form = new Form();
@@ -82,15 +103,29 @@ class ProfilePresenter extends SecurityPresenter
     public function processBackup(Form $form)
     {
         if ($this->user->isInRole('administrator')) {
+            $file = WWW_DIR . '/app/backup/' . date('Y-m-d H-i-s') . '.sql';
             try {
-                $this->databaseBackup
-                    ->save(WWW_DIR . '/app/backup/' . date('Y-m-d H-i') . '.sql');
-
+                $this->databaseBackup->save($file);
                 $this->flashMessage('Záloha databáze byla úspěšně provedena!', 'success');
 
             } catch (\Exception $e) {
                 $this->flashMessage($e->getMessage(), 'error');
             }
+
+            $mail = new Message();
+            $mail->setFrom('Výčetkový systém <' .$this->emails['system']. '>')
+                 ->addTo($this->emails['admin'])
+                 ->setSubject('Záloha databáze')
+                 ->addAttachment($file);
+
+            try {
+                $this->mailer->send($mail);
+                $this->flashMessage('Soubor se zálohou byl úspěšně odeslán.', 'success');
+
+            } catch (InvalidStateException $is) {
+                $this->flashMessage('Soubor se zálohou se nepodařilo odeslat.', 'warning');
+            }
+
         } else {
             $this->flashMessage('Nemáte dostatečná oprávnění k provedení akce.', 'warning');
         }
@@ -140,7 +175,7 @@ class ProfilePresenter extends SecurityPresenter
 
         try {
             $this->emailNotifier->send(
-                'Výčetkový systém <vycetkovy-system@alestichava.cz>',
+                'Výčetkový systém <' . $this->emails['system']. '>',
                 $invitation->email,
                 function (ITemplate $template, Invitation $invitation, $senderName) {
                     $template->setFile(__DIR__ . '/../../model/Notifications/templates/invitation.latte');
@@ -185,6 +220,7 @@ class ProfilePresenter extends SecurityPresenter
         $user->name = $values['name'];
 
         $this->userManager->saveUser($user);
+        $this->user->getIdentity()->name = $values['name'];
 
         $this->flashMessage('Vaše jméno bylo úspěšně změněno.', 'success');
         $this->redirect('this');

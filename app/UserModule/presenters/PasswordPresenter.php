@@ -29,6 +29,16 @@ class PasswordPresenter extends BasePresenter
      */
     private $user;
 
+    /**
+     * @var string
+     */
+    private $systemEmail;
+
+    public function setSystemEmail($systemEmail)
+    {
+        $this->systemEmail = $systemEmail;
+    }
+
     protected function createComponentPasswordReset()
     {
         $form = new Form();
@@ -58,7 +68,7 @@ class PasswordPresenter extends BasePresenter
 
         try {
             $this->emailNotifier->send(
-                'Výčetkový systém <vycetkovy-system@alestichava.cz>',
+                'Výčetkový systém <' .$this->systemEmail. '>',
                 $user->email,
                 function (ITemplate $template, $email, $token) {
                     $template->setFile(__DIR__ . '/../../model/Notifications/templates/resetEmail.latte');

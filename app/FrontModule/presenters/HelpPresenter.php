@@ -14,6 +14,15 @@ class HelpPresenter extends SecurityPresenter
      */
     public $mailer;
 
+    /**
+     * @var array ['admin' => ... , 'system' => ...]
+     */
+    private $emails;
+
+    public function setEmails(array $emails)
+    {
+        $this->emails = $emails;
+    }
 
     public function renderDoc()
     {
@@ -27,6 +36,9 @@ class HelpPresenter extends SecurityPresenter
     {
     }
 
+    /**
+     * @Actions contact
+     */
     protected function createComponentHelpForm()
     {
         $form = new Form;
@@ -55,9 +67,9 @@ class HelpPresenter extends SecurityPresenter
         $email = $this->getUser()->getIdentity()->data['email'];
 
         $mail = new Message;
-        $mail->setFrom($username . " <$email>")
-             ->addTo('ales.tichava@gmail.com')
-             ->setSubject($values['subject'])
+        $mail->setFrom('Výčetkový systém <' .$this->emails['system']. '>')
+             ->addTo($this->emails['admin'])
+             ->setSubject($username . ' [' .$email. '] - ' . $values['subject'])
              ->setBody($values['text']);
 
         try {
