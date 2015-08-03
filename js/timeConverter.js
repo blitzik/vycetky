@@ -3,6 +3,7 @@
  */
 
 (function (global) {
+    "use strict";
 
     var TimeConverter = {
         'timeRegExp': /^-?\d+:[0-5][0-9]$/,
@@ -23,8 +24,8 @@
             }
 
             var timeParts = time.split(':');
-            var hours = parseInt(timeParts[0]);
-            var minutes = parseInt(timeParts[1]);
+            var hours = parseInt(timeParts[0], 10);
+            var minutes = parseInt(timeParts[1], 10);
 
             return hours * 60 + minutes;
         },
@@ -42,13 +43,13 @@
 
             minutes = isNegative ? (minutes * (-1)) : minutes;
             var hours = Math.floor(minutes / 60);
-            var minutes = minutes - (hours * 60);
+            var mins = minutes - (hours * 60);
 
-            if (minutes < 10) {
-                minutes = '0' + minutes;
+            if (mins < 10) {
+                mins = '0' + mins;
             }
 
-            return (isNegative ? '-' : '') + hours + ':' + minutes;
+            return (isNegative ? '-' : '') + hours + ':' + mins;
         },
 
         /**
@@ -58,15 +59,16 @@
         'timeWithComma2Minutes': function (hoursAndMinutes) {
             if (!this.hoursAndMinutesRegExp.test(hoursAndMinutes)) {
                 throw 'Wrong format of argument "hoursAndMinutes"';
-            } else {
-                if (this.isInt(hoursAndMinutes)) {
-                    hoursAndMinutes = hoursAndMinutes.toString();
-                }
             }
 
+            if (this.isInt(hoursAndMinutes)) {
+                hoursAndMinutes = hoursAndMinutes.toString();
+            }
+
+
             var timeParts = hoursAndMinutes.split(',');
-            var hours = parseInt(timeParts[0]) * 60;
-            var minutes = parseInt(timeParts[1]);
+            var hours = parseInt(timeParts[0], 10) * 60;
+            var minutes = parseInt(timeParts[1], 10);
 
             minutes = ((minutes == 5) ? 30 : 0);
 
@@ -83,16 +85,16 @@
                 throw 'Argument "minutes" must be integer number!';
             }
 
-            var minutes = parseInt(minutes);
+            var mins = parseInt(minutes, 10);
 
-            if (minutes % 30 !== 0) {
+            if (mins % 30 !== 0) {
                 throw 'Argument "minutes" must be divisible by 30 without reminder!';
             }
 
-            var t = this.minutes2Time(minutes);
+            var t = this.minutes2Time(mins);
             var timeParts = t.split(':');
 
-            var time, m;
+            var m;
             if (timeParts[1] == 30) {
                 m = ',5';
             } else if (timeParts[1] == 0) {
@@ -105,4 +107,4 @@
 
     global.TimeConverter = global.tc = TimeConverter;
 
-})(window);
+}(window));

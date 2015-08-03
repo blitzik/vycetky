@@ -1,4 +1,6 @@
-(function (global, $, tc) {
+(function ($, tc) {
+    "use strict";
+
     $(function () {
 
         var workStart = $('#workStart');
@@ -8,7 +10,11 @@
 
         // Sliders definition
 
-        $('#slider-lunch').slider(
+        var slider_lunch = $('#slider-lunch');
+        var slider_range = $('#slider-range');
+        var slider_time_other = $('#slider-time-other');
+
+        slider_lunch.slider(
             {
                 min: 0,
                 max: 300,
@@ -32,7 +38,7 @@
             }
         );
 
-        $('#slider-range').slider(
+        slider_range.slider(
             {
                 range: true,
                 min: 0,
@@ -56,7 +62,7 @@
             }
         );
 
-        $('#slider-time-other').slider(
+        slider_time_other.slider(
             {
                 min: 0,
                 max: 1410,
@@ -71,15 +77,15 @@
         // Sliders times set in item edit. Default values or values from DB
 
         workStart.change(function () {
-            $('#slider-range').slider('values', 0, $(this).val());
+            slider_range.slider('values', 0, $(this).val());
         });
 
         workEnd.change(function () {
-            $('#slider-range').slider('values', 1, $(this).val());
+            slider_range.slider('values', 1, $(this).val());
         });
 
         otherHours.change(function () {
-            $('#slider-time-other').slider('value', $(this).val());
+            slider_time_other.slider('value', $(this).val());
         });
 
         // Sliders appearance
@@ -96,12 +102,12 @@
             $('.workedHours').text('0');
             otherHours.val('0');
 
-            $('#slider-range').slider('values', 0, 0);
-            $('#slider-range').slider('values', 1, 0);
-            $('#slider-lunch').slider('value', 0);
-            $('#slider-time-other').slider('value', 0);
+            slider_range.slider('values', 0, 0);
+            slider_range.slider('values', 1, 0);
+            slider_lunch.slider('value', 0);
+            slider_time_other.slider('value', 0);
         });
 
     });
 
-}) (window, window.jQuery, window.TimeConverter);
+}(window.jQuery, window.TimeConverter));

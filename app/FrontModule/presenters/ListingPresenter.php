@@ -227,7 +227,7 @@ class ListingPresenter extends SecurityPresenter
                 ->onClick[] = callback($this, 'processDeleteListing');
 
         $form->addSubmit('cancel', 'Vrátit se zpět')
-                ->setValidationScope(null)
+                ->setValidationScope(false)
                 ->onClick[] = callback($this, 'processCancel');
 
         $form->addProtection();
