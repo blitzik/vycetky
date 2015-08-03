@@ -7,7 +7,7 @@ $(function() {
     var saveButton = $('#password-save-button');
     saveButton.attr('disabled', true).css('opacity', '0.5');
 
-    function arePasswordsEqual(pass, pass2)
+    var arePasswordsEqual = function (pass, pass2)
     {
         if (pass != pass2) {
             controlMessage.text('Hesla se neshodují').css('color', '#E81554');
@@ -16,7 +16,7 @@ $(function() {
             controlMessage.text('Hesla souhlasí').css('color', '#72D62F');
             saveButton.attr('disabled', false).css('opacity', '1');
         }
-    }
+    };
 
     pass.on('keyup', function () {
         var self = $(this);

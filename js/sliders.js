@@ -1,155 +1,107 @@
-$(function() {
+(function (global, $, tc) {
+    $(function () {
 
-    function convertTimeToMinutes(time)
-    {
-        var x = time.split(':');
-        var h = parseInt(x[0]);
-        var m = parseInt(x[1]);
+        var workStart = $('#workStart');
+        var workEnd = $('#workEnd');
+        var lunch = $('#lunch');
+        var otherHours = $('#otherHours');
 
-        var minutes = h * 60 + m;
+        // Sliders definition
 
-        return minutes;
-    }
+        $('#slider-lunch').slider(
+            {
+                min: 0,
+                max: 300,
+                step: 30,
+                value: tc.timeWithComma2Minutes(lunch.val()),
+                slide: function (event, ui) {
+                    var time = ui.value;
+                    var wsMinutes = tc.time2Minutes(workStart.val());
+                    var weMinutes = tc.time2Minutes(workEnd.val());
 
-    function convertMinutesToTime(minutes)
-    {
-        var hours = Math.floor(minutes / 60);
-        var mins = minutes - (hours * 60);
+                    var workedTime = weMinutes - wsMinutes - ui.value;
 
-        if(hours.length < 10) hours = '0' + hours;
-        if(mins.length < 10) mins = '0' + mins;
+                    if (workedTime < 0) {
+                        return false;
+                    }
 
-        if(mins == 0) mins = '00';
+                    lunch.val(tc.minutes2TimeWithComma(time));
 
-        var result = hours + ":" + mins;
-
-        return result;
-    }
-
-    function hoursAndMinutes2Minutes(time)
-    {
-        var t = time.split(',');
-        var hours = parseInt(t[0]) * 60;
-        var minutes = parseInt(t[1]);
-
-        minutes = ((minutes == 5) ? 30 : 0);
-
-        return (hours + minutes);
-    }
-
-    function convertMinutes2HoursAndMinutes(minutes)
-    {
-        var hours = Math.floor(minutes / 60);
-        var mins = minutes % 60;
-
-        if (mins == 30) {
-            hours = hours + ',5';
-        }
-
-        return hours;
-    }
-
-    // -------------------------------
-
-    var workStart = $('#workStart');
-    var workEnd = $('#workEnd');
-    var lunch = $('#lunch');
-    var otherHours = $('#otherHours');
-
-    // Sliders definition
-
-    $('#slider-lunch').slider(
-    {
-        min: 0,
-        max: 300,
-        step: 30,
-        value: hoursAndMinutes2Minutes(lunch.val()),
-        slide: function( event, ui ) {
-            var time = ui.value;
-            var wsMinutes = convertTimeToMinutes(workStart.val());
-            var weMinutes = convertTimeToMinutes(workEnd.val());
-
-            var workedTime = weMinutes - wsMinutes - ui.value;
-
-            if (workedTime < 0) {
-                return false;
+                    $('.workedHours').text(tc.minutes2TimeWithComma(weMinutes - wsMinutes - ui.value));
+                }
             }
+        );
 
-            lunch.val(convertMinutes2HoursAndMinutes(time));
+        $('#slider-range').slider(
+            {
+                range: true,
+                min: 0,
+                max: 1410,
+                step: 30,
+                values: [tc.time2Minutes(workStart.val()),
+                         tc.time2Minutes(workEnd.val())],
+                slide: function (event, ui) {
+                    var l = tc.timeWithComma2Minutes(lunch.val());
+                    var workedTime = ui.values[1] - ui.values[0] - l;
 
-            $('.workedHours').text(convertMinutes2HoursAndMinutes(weMinutes - wsMinutes - ui.value));
-        }
-    }
-    );
+                    if (workedTime < 0) {
+                        return false;
+                    }
 
-    $('#slider-range').slider(
-    {
-        range: true,
-        min: 0,
-        max: 1410,
-        step: 30,
-        values: [ convertTimeToMinutes(workStart.val()),
-                  convertTimeToMinutes(workEnd.val())],
-        slide: function( event, ui ) {
-            var l = hoursAndMinutes2Minutes(lunch.val());
-            var workedTime = ui.values[1] - ui.values[0] - l;
+                    workStart.val(tc.minutes2Time(ui.values[0]));
+                    workEnd.val(tc.minutes2Time(ui.values[1]));
 
-            if (workedTime < 0) {
-                return false;
+                    $('.workedHours').text(tc.minutes2TimeWithComma(workedTime));
+                }
             }
+        );
 
-            workStart.val(convertMinutesToTime(ui.values[0]));
-            workEnd.val(convertMinutesToTime(ui.values[1]));
+        $('#slider-time-other').slider(
+            {
+                min: 0,
+                max: 1410,
+                step: 30,
+                value: tc.timeWithComma2Minutes(otherHours.val()),
+                slide: function (event, ui) {
+                    otherHours.val(tc.minutes2TimeWithComma(ui.value));
+                }
+            }
+        );
 
-            $('.workedHours').text(convertMinutes2HoursAndMinutes(workedTime));
-        }
-    }
-    );
+        // Sliders times set in item edit. Default values or values from DB
 
-    $('#slider-time-other').slider(
-    {
-        min: 0,
-        max: 1410,
-        step: 30,
-        value: hoursAndMinutes2Minutes(otherHours.val()),
-        slide: function( event, ui ) {
-            otherHours.val(convertMinutes2HoursAndMinutes(ui.value));
-        }
-    }
-    );
+        workStart.change(function () {
+            $('#slider-range').slider('values', 0, $(this).val());
+        });
 
-    // Sliders times set in item edit. Default values or values from DB
+        workEnd.change(function () {
+            $('#slider-range').slider('values', 1, $(this).val());
+        });
 
-    workStart.change(function () {
-        $('#slider-range').slider('values', 0, $(this).val());
+        otherHours.change(function () {
+            $('#slider-time-other').slider('value', $(this).val());
+        });
+
+        // Sliders appearance
+
+        lunch.attr('readonly', true);
+        workStart.attr('readonly', true);
+        workEnd.attr('readonly', true);
+        otherHours.attr('readonly', true);
+
+        $('#btn-reset-time').click(function () {
+            lunch.val('0');
+            workStart.val('0:00');
+            workEnd.val('0:00');
+            $('.workedHours').text('0');
+            otherHours.val('0');
+
+            $('#slider-range').slider('values', 0, 0);
+            $('#slider-range').slider('values', 1, 0);
+            $('#slider-lunch').slider('value', 0);
+            $('#slider-time-other').slider('value', 0);
+        });
+
     });
 
-    workEnd.change(function () {
-        $('#slider-range').slider('values', 1, $(this).val());
-    });
-
-    otherHours.change(function () {
-        $('#slider-time-other').slider('value', $(this).val());
-    });
-
-    // Sliders appearance
-
-    lunch.attr('readonly', true);
-    workStart.attr('readonly', true);
-    workEnd.attr('readonly', true);
-    otherHours.attr('readonly', true);
-
-    $('#btn-reset-time').click(function(){
-        lunch.val('0');
-        workStart.val('0:00');
-        workEnd.val('0:00');
-        $('.workedHours').text('0');
-        otherHours.val('0');
-
-        $('#slider-range').slider('values', 0, 0);
-        $('#slider-range').slider('values', 1, 0);
-        $('#slider-lunch').slider('value', 0);
-        $('#slider-time-other').slider('value', 0);
-    });
-
-});
+}) (window, window.jQuery, window.TimeConverter);
