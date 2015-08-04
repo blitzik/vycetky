@@ -4,7 +4,6 @@ use Tester\Assert;
 
 require '/../bootstrap.php';
 
-
 $workedHours = new \App\Model\Entities\WorkedHours();
 $workedHours->setHours(
     new InvoiceTime('06:00'),

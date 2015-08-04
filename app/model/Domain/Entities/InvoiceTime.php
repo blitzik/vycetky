@@ -175,6 +175,9 @@ class InvoiceTime extends \Nette\Object
         $hoursAndMinutes = $this->hoursAndMinutes;
         if ($trimLeftZero == true) {
             $hoursAndMinutes = ltrim($hoursAndMinutes, 0);
+            if ($hoursAndMinutes[0] == ':') {
+                $hoursAndMinutes = '0' . $hoursAndMinutes;
+            }
         }
 
         return $hoursAndMinutes;

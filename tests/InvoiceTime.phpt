@@ -11,8 +11,21 @@ class InvoiceTimeTest extends \Tester\TestCase
         $t = new InvoiceTime();
         Assert::same('00:00:00', $t->getTime());
         Assert::same('00:00', $t->toHoursAndMinutes());
+        Assert::same('0:00', $t->toHoursAndMinutes(true));
         Assert::same('0', $t->toTimeWithComma());
         Assert::same(0, $t->toSeconds());
+    }
+
+    public function testLeadingZeroTrimming()
+    {
+        $t = new InvoiceTime('06:00:00');
+        Assert::same('6:00', $t->toHoursAndMinutes(true));
+
+        $t = new InvoiceTime('06:30:00');
+        Assert::same('6:30', $t->toHoursAndMinutes(true));
+
+        $t = new InvoiceTime('10:00:00');
+        Assert::same('10:00', $t->toHoursAndMinutes(true));
     }
 
     public function testInteger()

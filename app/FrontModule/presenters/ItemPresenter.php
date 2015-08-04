@@ -89,6 +89,7 @@ class ItemPresenter extends SecurityPresenter
         } else {
 
             $formData['day'] = $this->date->format('j.n.Y');
+
             $formData['lunch'] = $this->listingItem
                                       ->workedHours
                                       ->lunch->toTimeWithComma();
