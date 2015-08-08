@@ -9,9 +9,29 @@
         'timeRegExp': /^-?\d+:[0-5][0-9]$/,
         'hoursAndMinutesRegExp': /^\d+(,[05])?$/,
 
+        /**
+         * @param x
+         * @returns {boolean}
+         */
         'isInt': function (x) {
             var y = parseInt(x, 10);
             return !isNaN(y) && x == y && x.toString() == y.toString();
+        },
+
+        /**
+         * @param time
+         * @returns {boolean}
+         */
+        'isInTimeFormat': function (time) {
+            return this.timeRegExp.test(time);
+        },
+
+        /**
+         * @param time
+         * @returns {boolean}
+         */
+        'isInTimeWithCommaFormat': function (time) {
+            return this.hoursAndMinutesRegExp.test(time);
         },
 
         /**
@@ -102,6 +122,16 @@
             }
 
             return timeParts[0] + m;
+        },
+
+        'toMinutes': function (time) {
+            if (this.isInTimeFormat(time)) {
+                return this.time2Minutes(time);
+            } else if (this.isInTimeWithCommaFormat(time)) {
+                return this.timeWithComma2Minutes(time);
+            } else {
+                throw 'unexpected time format';
+            }
         }
     };
 

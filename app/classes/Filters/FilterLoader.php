@@ -42,12 +42,21 @@ class FilterLoader extends Object
     }
 
     /**
-     * @param $day
+     * @param int $day
      * @return string
      */
-    public function dayShortcut($day)
+    public function dayName($day)
     {
-        return TimeUtils::getDayShortcut(date_format($day, 'w'));
+        return TimeUtils::getDayName(date_format($day, 'w'));
+    }
+
+    /**
+     * @param \DateTime $day
+     * @return string
+     */
+    public function dayShortcut(\DateTime $day)
+    {
+        return TimeUtils::getDayName(date_format($day, 'w'), true);
     }
 
     /**

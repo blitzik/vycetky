@@ -1,5 +1,4 @@
 
-
 {form listingMassItemsChangeForm}
 
 {snippet flashMessage}
@@ -18,10 +17,23 @@
     <tr><th>{label workStart /}</th><th>{label workEnd /}</th>
         <th>{label lunch /}</th><th>Odpracovano</th></tr>
 
-    <tr><td>{input workStart}</td>
-        <td>{input workEnd}</td><td>{input lunch}</td>
-        <td><span class="workedHours">-</span>
-        </td>
+    <tr><td>{input workStart}
+            <div class="time-control">
+                {input workStartAdd}
+                {input workStartSub}
+            </div></td>
+            <td>{input workEnd}
+            <div class="time-control">
+                {input workEndAdd}
+                {input workEndSub}
+            </div></td><td>{input lunch}
+            <div class="time-control">
+                {input lunchAdd}
+                {input lunchSub}
+            </div></td>
+            <td>
+                <span class="workedHours">-</span>
+            </td>
     </tr>
 
     <tr><td colspan="2"><div id="slider-range"></div></td>
@@ -31,7 +43,10 @@
 
     <table class="table t-classic">
         <tr><th>{label otherHours /}</th></tr>
-        <tr><td>{input otherHours}</td></tr>
+        <tr><td>{input otherHours}<div class="time-control">
+                                              {input otherHoursAdd}
+                                              {input otherHoursSub}
+                                          </div></td></tr>
         <tr><td><div id="slider-time-other"></div></td></tr>
     </table>
     <div class="box box-red w300">Pokud budete měnit hodnotu <strong>"ostatních hodin"</strong> na
@@ -45,7 +60,7 @@ $(function () {
 });
 </script>
 
-<div class="box box-hint right">
+<div class="box box-hint w250 right">
     <h3>Hromadná změna položek</h3>
     <p>U změněných položek bude zachován den, místo
         a popis práce. Změní se pouze hodnoty týkající se času.</p>

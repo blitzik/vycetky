@@ -88,8 +88,6 @@ class ItemPresenter extends SecurityPresenter
 
         } else {
 
-            $formData['day'] = $this->date->format('j.n.Y');
-
             $formData['lunch'] = $this->listingItem
                                       ->workedHours
                                       ->lunch->toTimeWithComma();
@@ -125,6 +123,7 @@ class ItemPresenter extends SecurityPresenter
             $workedHours = $this->listingItem->workedHours->getHours();
         }
 
+        $this->template->itemDate = $this->date;
         $this->template->listing = $this->listing;
         $this->template->workedHours = $workedHours;
         $this->template->defaultWorkedHours = $this->itemUpdateFormFactory
@@ -157,11 +156,6 @@ class ItemPresenter extends SecurityPresenter
     {
         $values['listing'] = $this->listing;
         $values['userID']  = $this->user->id;
-
-        if ($values['day'] != $this->date->format('j.n.Y')) {
-            $form->addError('Položku není možné uložit. Zkontrolujte si datum položky.');
-            return;
-        }
 
         try {
             $listingItem = $this->itemFacade

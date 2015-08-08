@@ -36,7 +36,6 @@ final class TimeUtils extends Object
         return self::$days;
     }
 
-
     /**
      * @param int $monthNumber
      * @return string
@@ -44,11 +43,7 @@ final class TimeUtils extends Object
      */
     public static function getMonthName($monthNumber)
     {
-        if (!Validators::is($monthNumber, 'numericint:1..12'))
-            throw new InvalidArgumentException(
-                'Invalid argument. Only Integer number
-                 between 1 and 12 is allowed.'
-            );
+        Validators::assert($monthNumber, 'numericint:1..12');
 
         return self::$months[$monthNumber];
     }
@@ -71,19 +66,21 @@ final class TimeUtils extends Object
         return self::$months[$monthName];
     }
 
+
     /**
      * @param int $dayNumber
-     * @return int Returns name of the day
+     * @return string
      */
-    public static function getDayShortcut($dayNumber)
+    public static function getDayName($dayNumber, $getShortcut = false)
     {
-        if (!Validators::is($dayNumber, 'numericint:0..6'))
-            throw new InvalidArgumentException(
-                'Invalid argument. Only Integer
-                 number between 0 and 6 is allowed.'
-            );
+        Validators::assert($dayNumber, 'numericint:0..6');
+        Validators::assert($getShortcut, 'bool');
 
-        return \mb_strtoupper(\mb_substr(self::$days[$dayNumber], 0, 2), 'UTF-8');
+        if ($getShortcut === true) {
+            return \mb_strtoupper(\mb_substr(self::$days[$dayNumber], 0, 2), 'UTF-8');
+        }
+
+        return self::$days[$dayNumber];
     }
 
     /**
