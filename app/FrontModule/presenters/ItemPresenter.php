@@ -83,10 +83,7 @@ class ItemPresenter extends SecurityPresenter
             $this->listingItem = new Entities\ListingItem();
         }
 
-        if ($this->listingItem->isDetached()) {
-            $this['itemForm']['day']->setDefaultValue($this->date->format('j.n.Y'));
-
-        } else {
+        if (!$this->listingItem->isDetached()) {
 
             $formData['lunch'] = $this->listingItem
                                       ->workedHours
