@@ -16,6 +16,11 @@ services:
 		setup:
 			- setEmails(%emails%)
 
+	backupPresenter:
+		class: App\FrontModule\Presenters\BackupPresenter
+		setup:
+			- setEmails(%emails%)
+
 	passwordPresenter:
 		class: App\UserModule\Presenters\PasswordPresenter
 		setup:
@@ -125,6 +130,12 @@ services:
 	- App\Model\Notifications\EmailNotifier
 
 	- App\Model\Notifications\SharedListingNotification
+
+	databaseBackupControlFactory:
+		implement: App\Model\Components\IDatabaseBackupControlFactory
+		parameters: [array emails]
+		arguments: [%emails%]
+
 
 	# Database Backup
 	databaseBackup:

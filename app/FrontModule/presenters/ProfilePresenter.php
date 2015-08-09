@@ -3,6 +3,7 @@
 namespace App\FrontModule\Presenters;
 
 use Exceptions\Runtime\InvitationAlreadyExistsException;
+use App\Model\Components\IDatabaseBackupControlFactory;
 use App\Model\Notifications\EmailNotifier;
 use Nette\Application\UI\ITemplate;
 use App\Model\Entities\Invitation;
@@ -10,7 +11,6 @@ use App\Model\Facades\UserManager;
 use Nette\InvalidStateException;
 use \Nette\Application\UI\Form;
 use Nette\Mail\IMailer;
-use Nette\Mail\SendmailMailer;
 use Nette\Mail\Message;
 use Tracy\Debugger;
 
@@ -23,16 +23,16 @@ class ProfilePresenter extends SecurityPresenter
     public $databaseBackup;
 
     /**
-     * @var UserManager
-     * @inject
-     */
-    public $userManager;
-
-    /**
      * @var EmailNotifier
      * @inject
      */
     public $emailNotifier;
+
+    /**
+     * @var UserManager
+     * @inject
+     */
+    public $userManager;
 
     /**
      * @var IMailer
