@@ -63,9 +63,6 @@ class ItemService extends Object
     }
 
     /**
-     * Returns array of ListingItemDecorators where keys are day numbers.
-     * Second argument causes checking Year and Month of given ListingItem
-     * against this argument
      *
      * @param Entities\ListingItem[] $listingItems Array of ListingItems
      * @param int $year

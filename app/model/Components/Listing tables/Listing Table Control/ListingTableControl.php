@@ -104,7 +104,7 @@ class ListingTableControl extends Control
      */
     public function handleRemoveItem($day)
     {
-        $noDays = $this->listing->getDaysInMonth();
+        $noDays = $this->listing->getNumberOfDaysInMonth();
         if (!is_numeric($day) or !($day >= 1 and $day <= $noDays))
             $this->redirect('this');
 
@@ -138,7 +138,7 @@ class ListingTableControl extends Control
      */
     public function handleCopyItem($day)
     {
-        $noDays = $this->listing->getDaysInMonth();
+        $noDays = $this->listing->getNumberOfDaysInMonth();
         if (!is_numeric($day) or !($day >= 1 and $day <= $noDays))
             $this->redirect('this');
 

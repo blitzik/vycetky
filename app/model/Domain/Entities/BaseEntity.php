@@ -81,9 +81,15 @@ abstract class BaseEntity extends Entity
     }
 
     /**
-     * Při kolonování existující entity(v databází = attached)
-     * bude entita stejná, kromě ID. Pokud má být ID zachováno,
-     * na existující entitě před klonováním zavoláme ->detach().
+     * When cloning some Entity that is NOT in detached mode,
+     * the cloning will create new Entity with the same properties
+     * but without ID. If the ID should be preserved, just invoke
+     * ->detach on existing attached entity before its cloning.
+     *
+     * ATTENTION: The mapper of Entity is gonna be removed, so
+     *            you cannot get reference to another Entity within
+     *            cloned Entity. But the IDs of those Entities are
+     *            available inside the $row.
      */
     public function __clone()
     {
@@ -96,7 +102,12 @@ abstract class BaseEntity extends Entity
                                         ->getShortName()
                                );
             $this->row->detach();
+            // Entity now has NO ID, but for persisting is
+            // used $modified property of Result, where the ID
+            // is still available -> Error when unique key is defined
+            // at column/s.
 
+            // we have to unset the ID manually
             unset($this->row->{$primaryKey});
         }
 

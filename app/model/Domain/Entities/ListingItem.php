@@ -36,7 +36,7 @@ class ListingItem extends BaseEntity
 
         if (!$this->isDetached()) {
             if (isset($this->listing)) {
-                $daysInMonth = $this->listing->getDaysInMonth();
+                $daysInMonth = $this->listing->getNumberOfDaysInMonth();
                 if ($day < 1 or $day > $daysInMonth) {
                     throw new InvalidArgumentException(
                         $errMessage . ' between 1-' . $daysInMonth
@@ -59,7 +59,7 @@ class ListingItem extends BaseEntity
      */
     public function setListing(Listing $listing)
     {
-        $listingDaysInMonth = $listing->getDaysInMonth();
+        $listingDaysInMonth = $listing->getNumberOfDaysInMonth();
         if (isset($this->day) and $this->day > $listingDaysInMonth) {
             throw new InvalidArgumentException(
                 'Day of ListingItem exceed last day in Listing period.'

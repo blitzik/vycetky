@@ -42,8 +42,7 @@ class WorkedHours extends BaseEntity
     ) {
         if ($workStart->compare($workEnd) === 1) {
             throw new ShiftEndBeforeStartException(
-                'You cannot quit your shift before you even started!
-                 Check your "workStart" and "workEnd" parameters.'
+                'You cannot quit your shift before you even started!'
             );
         }
 

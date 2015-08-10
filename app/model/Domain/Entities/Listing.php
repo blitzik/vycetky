@@ -71,7 +71,7 @@ class Listing extends BaseEntity
         );
     }
 
-    public function getDaysInMonth()
+    public function getNumberOfDaysInMonth()
     {
         if (!isset($this->numberOfDaysInListingMonth)) {
             $this->numberOfDaysInListingMonth = TimeUtils::getNumberOfDaysInMonth(

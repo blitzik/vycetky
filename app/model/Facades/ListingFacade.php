@@ -381,7 +381,7 @@ class ListingFacade extends Object
                           $listing->listingItems
                       );
 
-        $days = $baseListing->getDaysInMonth();
+        $days = $baseListing->getNumberOfDaysInMonth();
 
         $result = array();
         for ($day = 1; $day <= $days; $day++) {
