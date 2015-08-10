@@ -153,6 +153,7 @@ class ItemPresenter extends SecurityPresenter
     {
         $values['listing'] = $this->listing;
         $values['userID']  = $this->user->id;
+        $values['day'] = $this->date;
 
         try {
             $listingItem = $this->itemFacade

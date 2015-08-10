@@ -96,7 +96,7 @@ class ItemFacade extends Object
 
             if ($listingItem->isDetached()) {
                 $listingItem->listing = ($values['listing']);
-                $listingItem->day = (new \DateTime($values['day']))->format('j');
+                $listingItem->day = $values['day']->format('j');
                 $listingItem->locality = $this->setupLocalityEntity($values['locality']);
                 $listingItem->workedHours = $this->setupWorkedHoursEntity($wh);
                 $listingItem->description = $values['description'];
@@ -202,7 +202,7 @@ class ItemFacade extends Object
         Listing $listing
     ) {
         // we do NOT want to shift the last item
-        if ($day >= $listing->getDaysInMonth()) {
+        if ($day >= $listing->getNumberOfDaysInMonth()) {
             throw new DayExceedCurrentMonthException;
         }
 
