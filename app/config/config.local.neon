@@ -1,6 +1,10 @@
 parameters:
 	mainEmail: 'admin@email.em'
 
+	backup:
+		database:
+			password: 'password'
+
 	database:
 		driver: mysql
 		host: 127.0.0.1

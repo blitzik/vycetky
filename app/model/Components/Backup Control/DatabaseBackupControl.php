@@ -36,6 +36,11 @@ class DatabaseBackupControl extends Control
      */
     private $emails;
 
+    /**
+     * @var string
+     */
+    private $backupPassword;
+
     public function __construct(
         array $emails,
         \DatabaseBackup $databaseBackup,
@@ -47,6 +52,14 @@ class DatabaseBackupControl extends Control
         $this->databaseBackup = $databaseBackup;
         $this->mailer = $mailer;
         $this->user = $user;
+    }
+
+    /**
+     * @param $password
+     */
+    public function setPasswordForBackup($password)
+    {
+        $this->backupPassword = $password;
     }
 
     /**
@@ -88,17 +101,21 @@ class DatabaseBackupControl extends Control
     {
         $file = WWW_DIR . '/app/backup/auto-' . date('Y-m-d') . '.sql';
         if (!file_exists($file)) {
-            if ($pass != 'password-for-database-backup') {
-                $this->logError('Forbidden access.');
-            } else {
-                try {
-                    $this->databaseBackup->save($file);
-                    $this->sendMail('Automatic database backup', 'OK', $file);
-
-                } catch (\Exception $e) {
-                    $this->logError($e->getMessage());
-                    $this->sendMail('Automatic database backup failure', $e->getMessage());
+            if ($this->backupPassword !== null) {
+                if ($this->backupPassword != $pass) {
+                    $this->logError('Forbidden access.');
+                    $this->sendMail('Automatic database backup', 'Forbidden access');
+                    return;
                 }
+            }
+
+            try {
+                $this->databaseBackup->save($file);
+                $this->sendMail('Automatic database backup', 'OK', $file);
+
+            } catch (\Exception $e) {
+                $this->logError($e->getMessage());
+                $this->sendMail('Automatic database backup failure', $e->getMessage());
             }
         }
     }

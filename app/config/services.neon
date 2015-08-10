@@ -135,6 +135,8 @@ services:
 		implement: App\Model\Components\IDatabaseBackupControlFactory
 		parameters: [array emails]
 		arguments: [%emails%]
+		setup:
+			- setPasswordForBackup(%backup.database.password%)
 
 
 	# Database Backup
