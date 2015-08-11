@@ -30,7 +30,7 @@ class FilterControl extends Control
 
     public function processFilter(Form $form, $values)
     {
-        $this->presenter->redirect('this', (array) $values);
+        $this->presenter->redirect('Listing:overview', (array) $values);
     }
 
     public function render()

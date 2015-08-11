@@ -12,8 +12,8 @@ use App\Model\Components\IFilterControlFactory;
 use App\Model\Components\ListingFormFactory;
 use Nette\Forms\Controls\SubmitButton;
 use App\Model\Facades\MessagesFacade;
-use App\Model\Facades\ItemFacade;
 use App\Model\Facades\UserManager;
+use App\Model\Facades\ItemFacade;
 use Nette\Application\UI\Form;
 use App\Model\Time\TimeUtils;
 use Exceptions\Runtime;
@@ -103,6 +103,11 @@ class ListingPresenter extends SecurityPresenter
      */
     private $listing;
 
+    /**
+     * @var Entities\Listing[]
+     */
+    private $listings;
+
     private $numberOfMessages;
 
     /**
@@ -128,6 +133,11 @@ class ListingPresenter extends SecurityPresenter
     public function actionOverview($month, $year)
     {
         $this->setPeriodParametersForFilter($year, $month);
+
+        $this->listings = $this->listingFacade
+                               ->findListingsByPeriod($year, $month);
+
+        $this['listingsOverview']->setListings($this->listings);
     }
 
     public function renderOverview($month, $year)
@@ -143,11 +153,7 @@ class ListingPresenter extends SecurityPresenter
      */
     protected function createComponentListingsOverview()
     {
-        $comp = $this->listingsOverviewFactory
-                     ->create(
-                         ['year'  => $this->presenter->getParameter('year'),
-                          'month' => $this->presenter->getParameter('month')]
-                     );
+        $comp = $this->listingsOverviewFactory->create();
 
         $comp->setHeading('Mé výčetky');
 

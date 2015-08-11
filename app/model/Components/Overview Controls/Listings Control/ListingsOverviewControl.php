@@ -37,21 +37,30 @@ class ListingsOverviewControl extends Control
 
 
     public function __construct(
-        array $filterParams,
+        //array $listings,
         User $user,
         ListingFacade $listingFacade
     ) {
-        $this->checkFilterParameters($filterParams);
+        //$this->checkFilterParameters($filterParams);
 
-        $this->filterParams = $filterParams;
+        //$this->filterParams = $filterParams;
         $this->user = $user;
         $this->listingFacade = $listingFacade;
 
-        $this->listings = $this->listingFacade
+        //$this->listings = $listings;
+        /*$this->listings = $this->listingFacade
                                ->findListingsByPeriod(
                                    $filterParams['year'],
                                    $filterParams['month']
-                               );
+                               );*/
+    }
+
+    /**
+     * @param array $listings
+     */
+    public function setListings(array $listings)
+    {
+        $this->listings = $listings;
     }
 
     protected function createComponentDataGrid()
@@ -86,13 +95,13 @@ class ListingsOverviewControl extends Control
         $template = $this->getTemplate();
         $template->setFile(__DIR__ . '/templates/template.latte');
 
-        if (isset($this->filterParams['month'])) {
-            $this->template->date = new \DateTime($this->filterParams['year'] . '-' .
-                                                  $this->filterParams['month'] . '-01');
+        if ($this->presenter->getParameter('month') !== null) {
+            $this->template->date = new \DateTime($this->presenter->getParameter('year') . '-' .
+                                                  $this->presenter->getParameter('month') . '-01');
         }
 
         $template->heading = $this->heading;
-        $template->numberOfListings = Arrays::count_recursive($this->listings, 1);
+        $template->numberOfListings = isset($this->listings) ? Arrays::count_recursive($this->listings, 1) : 0;
         $template->listings = $this->listings;
 
         $template->render();
