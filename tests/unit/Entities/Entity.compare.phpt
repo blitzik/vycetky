@@ -2,28 +2,25 @@
 
 use Tester\Assert;
 
-require '../bootstrap.php';
+require '../../bootstrap.php';
 
-$workedHours = new \App\Model\Entities\WorkedHours();
-$workedHours->setHours(
+$workedHours = \App\Model\Entities\WorkedHours::loadState(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:00')
 );
 
-$workedHours2 = new \App\Model\Entities\WorkedHours();
-$workedHours2->setHours(
+$workedHours2 = \App\Model\Entities\WorkedHours::loadState(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:00')
 );
-
 
 Assert::same(true, $workedHours->compare($workedHours2));
 
 //////////
 
-$workedHours2->setHours(
+$workedHours2 = \App\Model\Entities\WorkedHours::loadState(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:30')
@@ -33,8 +30,4 @@ Assert::same(false, $workedHours->compare($workedHours2));
 
 //////////
 
-Assert::same(false, $workedHours->compare($workedHours2, ['lunch']));
-
-/////////
-
-Assert::same(true, $workedHours->compare($workedHours2, ['lunch', 'hours', 'totalWorkedHours']));
+Assert::same(true, $workedHours->compare($workedHours2, ['lunch']));

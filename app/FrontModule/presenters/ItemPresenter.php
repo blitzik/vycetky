@@ -80,10 +80,11 @@ class ItemPresenter extends SecurityPresenter
 
         } catch (Runtime\ListingItemNotFoundException $li) {
 
-            $this->listingItem = new Entities\ListingItem();
+            $this->listingItem = null;
         }
 
-        if (!$this->listingItem->isDetached()) {
+        if ($this->listingItem instanceof Entities\ListingItem and
+            !$this->listing->isDetached()) {
 
             $formData['lunch'] = $this->listingItem
                                       ->workedHours
@@ -116,7 +117,8 @@ class ItemPresenter extends SecurityPresenter
         $this->template->_form = $this['itemForm'];
 
         $workedHours = null;
-        if (!$this->listingItem->isDetached()) {
+        if ($this->listingItem instanceof Entities\ListingItem and
+            !$this->listing->isDetached()) {
             $workedHours = $this->listingItem->workedHours->getHours();
         }
 
@@ -151,22 +153,50 @@ class ItemPresenter extends SecurityPresenter
 
     public function processSaveItem(Form $form, $values)
     {
-        $values['listing'] = $this->listing;
-        $values['userID']  = $this->user->id;
-        $values['day'] = $this->date;
-
         try {
-            $listingItem = $this->itemFacade
-                                ->saveListingItem($this->listingItem, (array) $values);
+            $workedHours = Entities\WorkedHours::loadState(
+                new \InvoiceTime($values['workStart']),
+                new \InvoiceTime($values['workEnd']),
+                new \InvoiceTime($values['lunch']),
+                new \InvoiceTime($values['otherHours'])
+            );
+            $this->itemFacade->setupWorkedHoursEntity($workedHours);
 
-        } catch (Runtime\NegativeResultOfTimeCalcException $is) {
+            $locality = Entities\Locality::loadState($values['locality']);
+            $this->itemFacade->setupLocalityEntity($locality);
+
+            if (is_null($this->listingItem)) {
+                $this->listingItem = Entities\ListingItem::loadState(
+                    $this->date->format('j'),
+                    $this->listing,
+                    $workedHours,
+                    $locality,
+                    $values['description'],
+                    $values['descOtherHours']
+                );
+            } else {
+                $this->listingItem->setTime($workedHours, $values['descOtherHours']);
+                $this->listingItem->setLocality($locality);
+            }
+
+            $this->listingItem->description = $values['description'];
+
+            $listingItem = $this->itemFacade
+                                ->saveListingItem($this->listingItem);
+
+        } catch (Runtime\OtherHoursZeroTimeException $zt) {
+            $form->addError(ItemUpdateFormFactory::OTHER_HOURS_ZERO_TIME_ERROR_MSG);
+            return;
+
+
+        } catch (Runtime\NegativeResultOfTimeCalcException $b) {
             $form->addError(
                 'Položku nelze uložit. Musíte mít odpracováno více hodin,
                  než kolik strávíte obědem.'
             );
             return;
 
-        } catch (Runtime\ShiftEndBeforeStartException $e) {
+        } catch (Runtime\ShiftEndBeforeStartException $c) {
             $form->addError(
                 'Nelze skončit směnu dřív než začne. Zkontrolujte si začátek
                  a konec směny.'

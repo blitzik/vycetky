@@ -2,10 +2,9 @@
 
 use Tester\Assert;
 
-require '../bootstrap.php';
+require '../../bootstrap.php';
 
-$workedHours = new \App\Model\Entities\WorkedHours();
-$workedHours->setHours(
+$workedHours = \App\Model\Entities\WorkedHours::loadState(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:00'),
@@ -16,10 +15,11 @@ Assert::same('09:00:00', $workedHours->getHours()->getTime());
 
 Assert::same('10:00:00', $workedHours->getTotalWorkedHours()->getTime());
 
-Assert::exception(function () use ($workedHours) {
-    $workedHours->setHours(
+Assert::exception(function () {
+    $workedHours = \App\Model\Entities\WorkedHours::loadState(
         new InvoiceTime('16:00'),
         new InvoiceTime('06:00'),
+        new InvoiceTime('01:00'),
         new InvoiceTime('01:00')
     );
 }, 'Exceptions\Runtime\ShiftEndBeforeStartException',

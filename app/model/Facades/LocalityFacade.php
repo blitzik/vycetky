@@ -4,10 +4,10 @@ namespace App\Model\Facades;
 
 use App\Model\Repositories\LocalityRepository;
 use App\Model\Services\LocalityService;
+use Nette\Utils\Validators;
 use Nette\Security\User;
-use Nette\Object;
 
-class LocalityFacade extends Object
+class LocalityFacade extends BaseFacade
 {
     /**
      * @var LocalityRepository
@@ -19,17 +19,13 @@ class LocalityFacade extends Object
      */
     private $localityService;
 
-    /**
-     * @var User
-     */
-    private $user;
-
-
     public function __construct(
         LocalityRepository $localityRepository,
         LocalityService $localityService,
         User $user
     ) {
+        parent::__construct($user);
+
         $this->localityRepository = $localityRepository;
         $this->localityService = $localityService;
         $this->user = $user;
@@ -38,45 +34,68 @@ class LocalityFacade extends Object
     /**
      *
      * @param string $localityName
-     * @return string Localities separated by comma or empty string
+     * @param int $limit
+     * @param User|int|null $user
+     * @return string Localities
      */
-    public function findLocalitiesForAutocomplete($localityName, $limit)
-    {
-        $localities = $this->localityRepository
-                           ->findSimilarByName($localityName, $this->user->id, $limit);
+    public function findLocalitiesForAutocomplete(
+        $localityName,
+        $limit,
+        $user = null
+    ) {
+        Validators::assert($localityName, 'string');
+
+        $localities = $this->findLocalities($localityName, $limit, $user);
 
         return $this->localityService->prepareTagsForAutocomplete($localities);
     }
 
-    public function findLocalities($localityName, $limit)
+    /**
+     * @param string|null $localityName
+     * @param int $limit
+     * @param User|int|null $user
+     * @return array
+     */
+    public function findLocalities($localityName, $limit, $user = null)
     {
+        Validators::assert($localityName, 'string|null');
+        Validators::assert($limit, 'numericint');
+        $userID = $this->getUserID($user);
+
         return $localities = $this->localityRepository
                                   ->findSimilarByName(
                                       $localityName,
-                                      $this->user->id,
+                                      $userID,
                                       $limit
                                   );
     }
 
+    /**
+     * @return int
+     */
     public function getNumberOfUserLocalities()
     {
         return $this->localityRepository->getNumberOfUserLocalities($this->user->id);
     }
 
     /**
-     * @param $userID
+     * @param User|int|null $user
      * @return array
      */
-    public function findAllUserLocalities($userID)
+    public function findAllUserLocalities($user)
     {
+        $userID = $this->getUserID($user);
+
         return $this->localityRepository->findAllUserLocalities($userID);
     }
 
     /**
-     * @param $localityID
+     * @param int $localityID
      */
     public function removeUserLocality($localityID)
     {
+        Validators::assert($localityID, 'numericint');
+
         $this->localityRepository->removeUserLocality($localityID, $this->user->id);
     }
 

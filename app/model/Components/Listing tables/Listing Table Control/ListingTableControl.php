@@ -142,6 +142,7 @@ class ListingTableControl extends Control
         if (!is_numeric($day) or !($day >= 1 and $day <= $noDays))
             $this->redirect('this');
 
+        $err = 0;
         try {
             $newListingItem = $this->itemFacade
                                    ->shiftCopyOfListingItemDown(
@@ -150,26 +151,34 @@ class ListingTableControl extends Control
                                    );
 
         } catch (ListingItemNotFoundException $is) {
-            $this->flashMessage(
+            $this->presenter->flashMessage(
                 'Řádek výčetky nemohl být zkopírován, protože nebyl nalezen.',
                 'error'
             );
-            $this->redirect('this');
+            $err++;
 
         } catch (DayExceedCurrentMonthException $is) {
-            $this->flashMessage(
+            $this->presenter->flashMessage(
                 'Nelze vytvořit kopii poslední položky ve výčetce.',
                 'error'
             );
-            $this->redirect('this');
+            $err++;
 
         } catch (\DibiException $e) {
-            $this->flashMessage(
-                'Kopie výčetky nemohla být založena.
+            $this->presenter->flashMessage(
+                'Kopie položky nemohla být založena.
                  Zkuste akci opakovat později.',
                 'error'
             );
-            $this->redirect('this');
+            $err++;
+        }
+
+        if ($err !== 0) {
+            if ($this->presenter->isAjax()) {
+                $this->presenter->redrawControl('flashMessages');
+            } else {
+                $this->redirect('this');
+            }
         }
 
         if ($this->presenter->isAjax()) {

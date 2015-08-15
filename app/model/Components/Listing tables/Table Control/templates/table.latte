@@ -59,7 +59,7 @@
             <td>{if !$item->areWorkedHoursWithoutLunchZero()}
                 {$item->hours|toTimeWithComma}{/if}</td>
 
-            <td{if $item->descOtherHours} title="{$item->descOtherHours}"
+            <td{if !is_null($item->descOtherHours)} title="{$item->descOtherHours}"
                                           class="desc-other-hours"{/if}>
                                           {$item->otherHours|toTimeWithComma}</td>
 

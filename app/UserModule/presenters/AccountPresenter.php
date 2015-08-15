@@ -15,12 +15,6 @@ class AccountPresenter extends BasePresenter
     public $userManager;
 
     /**
-    * @var \Nette\Http\IRequest
-    * @inject
-    */
-    public $httpRequest;
-
-    /**
      * @var \App\Model\Entities\Invitation
      */
     private $invitation;
@@ -162,13 +156,16 @@ class AccountPresenter extends BasePresenter
             return;
         }
 
-        $values['ip']        = $this->httpRequest->getRemoteAddress();
+        $values['ip']        = $this->getHttpRequest()->getRemoteAddress();
         $values['role']      = 'employee';
-        $values['lastIP']    = $values['ip'];
-        $values['lastLogin'] = new \Nette\Utils\DateTime();
 
-        $user = new \App\Model\Entities\User;
-        $user->assign($values);
+        $user = \App\Model\Entities\User::loadState(
+            $values['username'],
+            $values['password'],
+            $values['email'],
+            $values['ip'],
+            $values['role']
+        );
 
         try {
             $this->userManager->registerNewUser($user, $this->invitation);

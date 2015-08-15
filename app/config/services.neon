@@ -32,7 +32,7 @@ services:
 		setup:
 			- addFilter(null, [Filters\FilterLoader(), 'loader'])
 
-	- App\Model\Components\ListingFormFactory
+	listingFormFactory: App\Model\Components\ListingFormFactory
 
 	# Factories
 	itemUpdateFormFactory:
@@ -84,50 +84,50 @@ services:
 	listingsOverviewControlFactory:
 		implement: App\Model\Components\IListingsOverviewControlFactory
 
-	- \Components\IPaginatorFactory
+	paginatorFactory: \Components\IPaginatorFactory
 
 	# LeanMapper
-	- App\Model\Mapper\StandardMapper
-	- \EntityFactory
+	standardMapper: App\Model\Mapper\StandardMapper
+	entityFactory: LeanMapper\DefaultEntityFactory
 
 	# Repositories
-	- App\Model\Repositories\UserMessageRepository
-	- App\Model\Repositories\ListingItemRepository
-	- App\Model\Repositories\WorkedHoursRepository
-	- App\Model\Repositories\InvitationRepository
-	- App\Model\Repositories\LocalityRepository
-	- App\Model\Repositories\ListingRepository
-	- App\Model\Repositories\MessageRepository
-	- App\Model\Repositories\UserRepository
+	userMessageRepository: App\Model\Repositories\UserMessageRepository
+	listingItemRepository: App\Model\Repositories\ListingItemRepository
+	workedHoursRepository: App\Model\Repositories\WorkedHoursRepository
+	InvitationRepository: App\Model\Repositories\InvitationRepository
+	localityRepository: App\Model\Repositories\LocalityRepository
+	listingRepository: App\Model\Repositories\ListingRepository
+	messageRepository: App\Model\Repositories\MessageRepository
+	userRepository: App\Model\Repositories\UserRepository
 
 	# Transaction class
-	- Transaction
+	transaction: Transaction
 
 	# Service layers
-	- App\Model\Services\LocalityService
-	- App\Model\Services\ItemService
+	localityService: App\Model\Services\LocalityService
+	itemService: App\Model\Services\ItemService
 
 	# Facades
-	- App\Model\Facades\MessagesFacade
-	- App\Model\Facades\LocalityFacade
-	- App\Model\Facades\ListingFacade
-	- App\Model\Facades\UserManager
-	- App\Model\Facades\ItemFacade
+	messagesFacade: App\Model\Facades\MessagesFacade
+	localityFacade: App\Model\Facades\LocalityFacade
+	listingFacade: App\Model\Facades\ListingFacade
+	userManager: App\Model\Facades\UserManager
+	itemFacade: App\Model\Facades\ItemFacade
 
 	# Messages Loaders
-	- MessagesLoaders\ReceivedUnreadMessagesLoader
-	- MessagesLoaders\ReceivedReadMessagesLoader
-	- MessagesLoaders\SentMessagesLoader
+	receivedUnreadMessagesLoader: MessagesLoaders\ReceivedUnreadMessagesLoader
+	receivedReadMessagesLoader: MessagesLoaders\ReceivedReadMessagesLoader
+	sentMessagesLoader: MessagesLoaders\SentMessagesLoader
 
 	# Authenticators
-	- App\Model\Authenticators\UserAuthenticator
+	userAuthenticator: App\Model\Authenticators\UserAuthenticator
 
 	# Notifications
 
 		#Profile
-	- App\Model\Notifications\EmailNotifier
+	emailNotifier: App\Model\Notifications\EmailNotifier
 
-	- App\Model\Notifications\SharedListingNotification
+	sharedListingNotification: App\Model\Notifications\SharedListingNotification
 
 	databaseBackupControlFactory:
 		implement: App\Model\Components\IDatabaseBackupControlFactory

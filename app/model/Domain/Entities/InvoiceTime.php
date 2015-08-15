@@ -22,7 +22,8 @@ class InvoiceTime extends \Nette\Object
     /**
      * There is different behaviour based on given value and its data type.
      *
-     * NULL                   : set object to 00:00:00
+     * NULL                   : sets object to 00:00:00
+     * InvoiceTime            : sets object to InvoiceTime time
      * Integer                : integer means number of seconds that must be
      *                          positive and divisible by 1800 without reminder.
      * DateTime               : object takes only the time part
@@ -30,7 +31,7 @@ class InvoiceTime extends \Nette\Object
      * String [e.g. 43:30]    : hours and minutes time part
      * String [e.g 9 or 9,5]  : hours and minutes special format. ( but NOT 9,0)
      *
-     * @param DateTime|int|string|null $time
+     * @param DateTime|InvoiceTime|int|string|null $time
      */
     public function __construct($time = null)
     {
@@ -38,10 +39,10 @@ class InvoiceTime extends \Nette\Object
             $time = '00:00:00';
         }
 
-        $this->time = $this->gatherTime($time);
+        $this->time = self::gatherTime($time);
     }
 
-    private function timeWithComma2Time($timeWithComma)
+    private static function timeWithComma2Time($timeWithComma)
     {
         $hours = str_replace(',', '.', $timeWithComma);
 
@@ -49,12 +50,21 @@ class InvoiceTime extends \Nette\Object
     }
 
     /**
-     * @param $time
+     * @param DateTime|InvoiceTime|int|string|null $time
+     * @return string time in format HH..:MM:SS
+     */
+    public static function processTime($time)
+    {
+        return self::gatherTime($time);
+    }
+
+    /**
+     * @param DateTime|InvoiceTime|int|string|null $time
      * @return InvoiceTime
      */
     public function sumWith($time)
     {
-        $baseTime = $this->gatherTime($time);
+        $baseTime = self::gatherTime($time);
 
         $result = TimeManipulator::sumTimes([$baseTime, $this->getTime()]);
 
@@ -62,13 +72,13 @@ class InvoiceTime extends \Nette\Object
     }
 
     /**
-     * @param InvoiceTime|DateTime|string $time
+     * @param DateTime|InvoiceTime|int|string|null $time
      * @return InvoiceTime
      * @throws \Exceptions\Runtime\NegativeResultOfTimeCalcException
      */
     public function subTime($time)
     {
-        $baseTime = $this->gatherTime($time);
+        $baseTime = self::gatherTime($time);
 
         $baseSecs = TimeManipulator::time2seconds($baseTime);
         $resultSecs = $this->toSeconds() - $baseSecs;
@@ -80,12 +90,12 @@ class InvoiceTime extends \Nette\Object
     }
 
     /**
-     * @param InvoiceTime|DateTime|string $time
+     * @param DateTime|InvoiceTime|int|string|null $time
      * @return int B = 1, L = -1, E = 0
      */
     public function compare($time)
     {
-        $paramSecs = TimeManipulator::time2seconds($this->gatherTime($time));
+        $paramSecs = TimeManipulator::time2seconds(self::gatherTime($time));
         $objSecs = $this->toSeconds();
 
         if ($objSecs > $paramSecs) {
@@ -100,10 +110,10 @@ class InvoiceTime extends \Nette\Object
     }
 
     /**
-     * @param $time
+     * @param DateTime|InvoiceTime|int|string|null $time
      * @return string
      */
-    private function gatherTime($time)
+    private static function gatherTime($time)
     {
         if ($time instanceof self) {
             $time = $time->getTime();
@@ -125,7 +135,7 @@ class InvoiceTime extends \Nette\Object
 
         // time in format with comma
         if (is_string($time) and preg_match('~^\d+(,[05])?$~', $time)) {
-            $time = $this->timeWithComma2Time($time);
+            $time = self::timeWithComma2Time($time);
         }
 
         // final check

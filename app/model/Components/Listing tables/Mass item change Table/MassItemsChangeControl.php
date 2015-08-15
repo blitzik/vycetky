@@ -104,14 +104,14 @@ class MassItemsChangeControl extends Control
         $form['save']->caption = 'Změnit položky';
         $form['save']->setAttribute('class', 'ajax');
 
-        $form->onSuccess[] = $this->processMassItemChange;
+        $form->onSuccess[] = $this->processMassItemsChange;
 
         $form->addProtection();
 
         return $form;
     }
 
-    public function processMassItemChange(Form $form, $values)
+    public function processMassItemsChange(Form $form, $values)
     {
         $selectedItems = $form->getHttpData(Form::DATA_TEXT, 'items[]');
 
@@ -126,8 +126,7 @@ class MassItemsChangeControl extends Control
         }
 
         try {
-            $workedHours = new WorkedHours();
-            $workedHours->setHours(
+            $workedHours = WorkedHours::loadState(
                 new \InvoiceTime($values['workStart']),
                 new \InvoiceTime($values['workEnd']),
                 new \InvoiceTime($values['lunch']),
@@ -170,7 +169,7 @@ class MassItemsChangeControl extends Control
 
                 $this->itemsCollection = $data['changedItems'];
 
-                $this->flashMessage('Hodnoty byli úspěšně hromadně změneny.', 'success');
+                $this->flashMessage('Hodnoty byly úspěšně hromadně změneny.', 'success');
 
                 $this->redrawControl('flashMessage');
                 $this->redrawControl('formErrors');

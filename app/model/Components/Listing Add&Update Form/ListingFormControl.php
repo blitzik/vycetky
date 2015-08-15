@@ -50,14 +50,14 @@ class ListingFormControl extends Control
     ) {
         parent::__construct();
 
-        if (!(($listing instanceof Listing) or $listing == NULL)) {
+        if (!($listing instanceof Listing or $listing == null)) {
             throw new InvalidArgumentException;
         }
 
         $this->listing = $listing;
-        if ($this->listing === null) {
+        /*if ($this->listing === null) {
             $this->listing = new Listing();
-        }
+        }*/
 
         $this->listingDescriptionFactory = $listingDescriptionFactory;
         $this->listingFormFactory = $listingFormFactory;
@@ -84,7 +84,7 @@ class ListingFormControl extends Control
     {
         $form = $this->listingFormFactory->create($this->listing);
 
-        if (!$this->listing->isDetached()) { // Edit
+        if ($this->listing !== null) { // Edit
 
             $form['month']->setItems(
                 [$this->listing->month => TimeUtils::getMonthName($this->listing->month)]
@@ -126,11 +126,15 @@ class ListingFormControl extends Control
 
     public function processForm(Form $form, $values)
     {
-        if ($this->listing->isDetached()) {
-            $this->listing->setPeriod($values['year'], $values['month']);
+        if ($this->listing === null) {
+            $this->listing = Listing::loadState(
+                $values['year'],
+                $values['month'],
+                $this->user->id
+            );
         }
+
         $this->listing->description = $values['description'];
-        $this->listing->user = $this->user->id;
         $this->listing->hourlyWage = $values['hourlyWage'];
 
         $this->listingFacade->saveListing($this->listing);

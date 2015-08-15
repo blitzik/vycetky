@@ -22,6 +22,8 @@ nette:
 
 	debugger:
 		email: ales.tichava@gmail.com
+		bar:
+			- Nette\Bridges\DITracy\ContainerPanel
 
 	latte:
 		macros:

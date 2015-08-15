@@ -5,6 +5,7 @@ namespace App\Model\Repositories;
 use Exceptions\Runtime\ListingItemNotFoundException;
 use Exceptions\Logic\InvalidArgumentException;
 use \App\Model\Entities;
+use Tracy\Debugger;
 
 class ListingItemRepository extends BaseRepository
 {
@@ -102,6 +103,7 @@ class ListingItemRepository extends BaseRepository
      * @param int $day
      * @param $listingID
      * @return Entities\ListingItem
+     * @throws ListingItemNotFoundException Item that supposed to be the copy was not found
      */
     public function shiftCopyOfListingItemDown(
         $day,
@@ -131,6 +133,10 @@ class ListingItemRepository extends BaseRepository
                                             ($day + 1))
                                    ->execute()
                                    ->fetch();
+
+        if ($entity === false) {
+            throw new ListingItemNotFoundException;
+        }
 
         return $this->createEntity($entity);
     }

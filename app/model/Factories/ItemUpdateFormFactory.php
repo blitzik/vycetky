@@ -10,6 +10,11 @@ class ItemUpdateFormFactory
     const BTN_TIME_ADD_CLASS = 'btn-time-control-add';
     const BTN_TIME_SUB_CLASS = 'btn-time-control-sub';
 
+    const OTHER_HOURS_ZERO_TIME_ERROR_MSG = 'Abyste mohli napsat komentář k
+                                             ostatním hodinám, musíte nastavit
+                                             pole "ostatní hodiny" na hodnotu
+                                             větší než 0.';
+
     /**
      * @var array
      */
@@ -94,12 +99,11 @@ class ItemUpdateFormFactory
                 ->addCondition(Form::FILLED)
                 ->addRule(
                     function($item, $arg){
-                        return ((new \InvoiceTime($arg))->toSeconds() <= 0) ?
+                        return (\InvoiceTime::processTime($arg) == '00:00:00') ?
                             false :
                             true;
                     },
-                    'Abyste mohli napsat komentář k ostatním hodinám, musíte nastavit
-                     pole "ostatní hodiny" na hodnotu větší než 0.',
+                    self::OTHER_HOURS_ZERO_TIME_ERROR_MSG,
                     $form['otherHours']
                 );
 

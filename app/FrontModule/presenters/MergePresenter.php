@@ -2,11 +2,9 @@
 
 namespace App\FrontModule\Presenters;
 
+use Exceptions\Runtime\NoCollisionListingItemSelectedException;
 use App\Model\Components\IListingActionsMenuControlFactory;
-use Exceptions\Runtime\CollisionItemsOccurrenceException;
-use Exceptions\Runtime\CollisionItemsSelectionException;
 use Exceptions\Runtime\ListingNotFoundException;
-use Nette\InvalidArgumentException;
 use App\Model\Entities\Listing;
 use Nette\Application\UI\Form;
 use App\Model\Time\TimeUtils;
@@ -189,14 +187,6 @@ class MergePresenter extends SecurityPresenter
     public function processMergeListings(Form $form, $values)
     {
         $selectedCollisionItems = $form->getHttpData(Form::DATA_TEXT, 'itm[]');
-        /*$selectedCollisionItems = [];
-        for ($day = 1; $day <= 31; $day++) {
-            $x = 'itmDay' . $day . '[]';
-            $item = $form->getHttpData(Form::DATA_TEXT, $x);
-            if (!empty($item)) {
-                $selectedCollisionItems[] = $item[0];
-            }
-        }*/
 
         try {
             $this->listingFacade->mergeListings(
@@ -212,14 +202,8 @@ class MergePresenter extends SecurityPresenter
                  'month' => $this->listing->month]
             );
 
-        } catch (CollisionItemsOccurrenceException $cio) {
+        } catch (NoCollisionListingItemSelectedException $ncis) {
             $form->addError('Ve výčetce se stále nachází kolizní řádek/řádky.');
-            return;
-
-        } catch (CollisionItemsSelectionException $cis) {
-            $form->addError(
-                'Z kolizních řádků lze vybrat vždy jen jeden. Zkontrolujte svůj výběr'
-            );
             return;
 
         } catch (\DibiException $e) {

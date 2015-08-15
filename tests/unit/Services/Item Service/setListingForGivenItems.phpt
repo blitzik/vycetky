@@ -2,12 +2,11 @@
 
 use Tester\Assert;
 
-require '../../bootstrap.php';
+require '../../../bootstrap.php';
 
 $service = new \App\Model\Services\ItemService();
 
-$listing = new \App\Model\Entities\Listing();
-$listing->setPeriod(2015, 5);
+$listing = \App\Model\Entities\Listing::loadState(2015, 5, 1);
 
 $_er->makeAlive($listing, 1);
 

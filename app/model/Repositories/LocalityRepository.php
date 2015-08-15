@@ -3,6 +3,7 @@
 namespace App\Model\Repositories;
 
 use App\Model\Entities\Locality;
+use Tracy\Debugger;
 
 class LocalityRepository extends BaseRepository
 {
@@ -129,6 +130,36 @@ class LocalityRepository extends BaseRepository
                  ['localityID' => $locality->localityID,
                   'userID' => $userID]
              );
+    }
+
+    /**
+     * @param Locality $locality
+     * @return Locality
+     * @throws \DibiException
+     */
+    public function setupLocality(Locality $locality)
+    {
+        try {
+            $this->persist($locality);
+            return $locality;
+
+        } catch (\DibiException $e) {
+            if ($e->getCode() === 1062) {
+                $val = $this->connection
+                                   ->select('localityID AS id')
+                                   ->from($this->getTable())
+                                   ->where('name = ?', $locality->name)
+                                   ->fetch();
+
+                $locality->makeAlive($this->entityFactory, $this->connection, $this->mapper);
+                $locality->attach($val['id']);
+
+                return $locality;
+            }
+
+            Debugger::log($e, Debugger::ERROR);
+            throw $e;
+        }
     }
 
 }

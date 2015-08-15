@@ -197,12 +197,12 @@ class MailBoxPresenter extends SecurityPresenter
         $author = $values['isSystemMessage'] == true ? 0 : $this->user->id;
         try {
             $this->messagesFacade
-                ->sendMessage(
-                    $values->subject,
-                    $text,
-                    $author,
-                    $values->receivers
-                );
+                 ->sendMessage(
+                     $values->subject,
+                     $text,
+                     $author,
+                     $values->receivers
+                 );
 
         } catch (MessageLengthException $ml) {
             $form->addError('Zprávu nelze uložit, protože je příliš dlouhá.');

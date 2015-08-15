@@ -2,9 +2,9 @@
 
 namespace App\Model\Facades;
 
-use Exceptions\Runtime\CollisionItemsOccurrenceException;
+use Exceptions\Runtime\NoCollisionListingItemSelectedException;
 use Exceptions\Runtime\NegativeResultOfTimeCalcException;
-use Exceptions\Runtime\CollisionItemsSelectionException;
+use Exceptions\Runtime\ListingItemNotFoundException;
 use App\Model\Repositories\ListingItemRepository;
 use Exceptions\Logic\InvalidArgumentException;
 use App\Model\Repositories\ListingRepository;
@@ -13,11 +13,11 @@ use App\Model\Entities\WorkedHours;
 use App\Model\Entities\ListingItem;
 use App\Model\Services\ItemService;
 use App\Model\Entities\Listing;
+use Nette\Utils\Validators;
 use Nette\Security\User;
 use Tracy\Debugger;
-use Nette\Object;
 
-class ListingFacade extends Object
+class ListingFacade extends BaseFacade
 {
     /**
      * @var ListingItemRepository
@@ -44,12 +44,6 @@ class ListingFacade extends Object
      */
     private $itemFacade;
 
-    /**
-     * @var User
-     */
-    private $user;
-
-
     public function __construct(
         ListingItemRepository $listingItemRepository,
         ListingRepository $listingRepository,
@@ -58,21 +52,23 @@ class ListingFacade extends Object
         ItemFacade $itemFacade,
         User $user
     ) {
+        parent::__construct($user);
+
         $this->listingItemRepository = $listingItemRepository;
         $this->listingRepository = $listingRepository;
         $this->transaction = $transaction;
         $this->itemService = $itemService;
         $this->itemFacade = $itemFacade;
-        $this->user = $user;
     }
 
     /**
-     * @param Listing|NULL $listing
-     * @return int
+     * @param Listing $listing
+     * @return Listing
      */
     public function saveListing(Listing $listing)
     {
-        return $this->listingRepository->persist($listing);
+        $this->listingRepository->persist($listing);
+        return $listing;
     }
 
     /**
@@ -85,49 +81,69 @@ class ListingFacade extends Object
     }
 
     /**
-     * @param $id
+     * @param int $id
+     * @param User|int|null $user
      * @return Listing
      */
-    public function getEntireListingByID($id)
+    public function getEntireListingByID($id, $user = null)
     {
+        Validators::assert($id, 'numericint');
+        $userID = $this->getUserID($user);
+
         return $this->listingRepository
-                    ->getEntireListingByID($id, $this->user->id);
+                    ->getEntireListingByID($id, $userID);
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return Listing
+     * @throws ListingItemNotFoundException
      */
     public function getListingByID($id)
     {
+        Validators::assert($id, 'numericint');
+
         return $this->listingRepository->getListingByID($id);
     }
 
     /**
-     * @param $year
-     * @param $month
+     * @param int $year
+     * @param int $month
+     * @param User|int|null $user
      * @return Listing[]
      */
-    public function findListingsByPeriod($year, $month = null)
+    public function findListingsByPeriod($year, $month = null, $user = null)
     {
+        Validators::assert($year, 'numericint');
+        Validators::assert($month, 'numericint|null');
+        $userID = $this->getUserID($user);
+
         return $this->listingRepository
                     ->findUserListingsByPeriod(
-                        $this->user->id,
+                        $userID,
                         $year,
                         $month
                     );
     }
 
     /**
-     * @param $year
-     * @param $month
+     * @param int $year
+     * @param int $month
+     * @param User|int|null $user
      * @return array
      */
-    public function findPartialListingsDataForSelect($year, $month)
-    {
+    public function findPartialListingsDataForSelect(
+        $year,
+        $month,
+        $user = null
+    ) {
+        Validators::assert($year, 'numericint');
+        Validators::assert($month, 'numericint');
+        $userID = $this->getUserID($user);
+
         $listings =  $this->listingRepository
                           ->findPartialListings(
-                              $this->user->id,
+                              $userID,
                               $year,
                               $month
                           );
@@ -142,6 +158,27 @@ class ListingFacade extends Object
 
     /**
      * @param Listing $listing
+     * @param array|null $listingItems
+     * @return \App\Model\Entities\ListingItem[]
+     */
+    private function getItemsCopies(Listing $listing, array $listingItems = null)
+    {
+        $this->checkListingValidity($listing);
+
+        $items = null;
+        if (isset($listingItems)) {
+            $items = $this->itemService->setListingForGivenItems($listingItems, $listing);
+        } else {
+            $items = $listing->listingItems;
+        }
+
+        $itemsCopies = $this->itemService->createItemsCopies($items);
+
+        return $itemsCopies;
+    }
+
+    /**
+     * @param Listing $listing
      * @param bool $withItems
      * @param null $userID
      * @return Listing
@@ -152,17 +189,9 @@ class ListingFacade extends Object
         $withItems = true,
         $userID = null
     ) {
-        if ($listing->isDetached()) {
-            throw new InvalidArgumentException('Argument $listing must be attached Entity.');
-        }
-
-        $newItems = [];
-        if ($withItems === true) {
-            if (count($listing->listingItems) > 0) {
-                $newItems = $this->itemService
-                                 ->createItemsCopies($listing->listingItems);
-            }
-        }
+        $this->checkListingValidity($listing);
+        Validators::assert($withItems, 'boolean');
+        Validators::assert($userID, 'numericint|null');
 
         $newListing = clone $listing;
         if ($userID !== null) {
@@ -174,8 +203,9 @@ class ListingFacade extends Object
 
             $this->listingRepository->persist($newListing);
 
-            if (count($newItems) > 0) {
-                $this->persistListingItems($newItems, $newListing);
+            if ($withItems === true and count($listing->listingItems) > 0) {
+                $newItems = $this->getItemsCopies($newListing, $listing->listingItems);
+                $this->persistListingItems($newItems);
             }
 
             $this->transaction->commit();
@@ -206,6 +236,15 @@ class ListingFacade extends Object
         $createNewListing = true,
         array $selectedItemsIDsToChange
     ) {
+        $this->checkListingValidity($listing);
+        Validators::assert($createNewListing, 'boolean');
+
+        if (empty($selectedItemsIDsToChange)) {
+            throw new InvalidArgumentException(
+                'Argument $selectedItemsIDsToChange must not be empty array!'
+            );
+        }
+
         $listingItems = $listing->listingItems;
 
         $itemsToChange = [];
@@ -224,40 +263,31 @@ class ListingFacade extends Object
         try {
             $this->transaction->begin();
 
+            // amount of Items is same all the time
+            $numberOfItemsToChange = count($itemsToChange);
+
             if ($createNewListing === true) {
                 $listing = $this->establishListingCopy($listing, false);
-            }
 
-            if (count($itemsToCopy) > 0 and $createNewListing === true) {
-                    $itemsCopies = $this->itemService
-                                        ->createItemsCopies($itemsToCopy);
-                    $itemsToCopy = $this->itemService
-                                        ->setListingForGivenItems(
-                                            $itemsCopies,
-                                            $listing
-                                        );
-            }
-
-            if (count($itemsToChange) > 0) {
-                if ($createNewListing === true) {
-                    $itemsCopies = $this->itemService
-                                        ->createItemsCopies($itemsToChange);
-                    $itemsToChange = $this->itemService
-                                          ->setListingForGivenItems(
-                                              $itemsCopies,
-                                              $listing
-                                          );
+                if (count($itemsToCopy) > 0) {
+                    $itemsToCopy = $this->getItemsCopies($listing, $itemsToCopy);
                 }
 
+                if ($numberOfItemsToChange > 0) {;
+                    $itemsToChange = $this->getItemsCopies($listing, $itemsToChange);
+                }
+            }
+
+            if ($numberOfItemsToChange > 0) {
                 $workedHours = $this->itemFacade
                                     ->setupWorkedHoursEntity($workedHours);
 
                 foreach ($itemsToChange as $item) {
-                    $item->workedHours = $workedHours;
-
+                    $descOtherHours = $item->descOtherHours;
                     if ($workedHours->otherHours->toSeconds() == 0) {
-                        $item->descOtherHours = null;
+                        $descOtherHours = null;
                     }
+                    $item->setTime($workedHours, $descOtherHours);
                 }
             }
 
@@ -301,6 +331,9 @@ class ListingFacade extends Object
         array $recipients,
         array $ignoredItemsIDs = null
     ) {
+        $this->checkListingValidity($listing);
+        Validators::assert($description, 'string');
+
         $listingItems = $listing->listingItems;
 
         if (isset($ignoredItemsIDs)) {
@@ -367,8 +400,13 @@ class ListingFacade extends Object
      * @param Listing $listing
      * @return array
      */
-    public function getMergedListingsItemsForEntireTable(Listing $baseListing, Listing $listing)
-    {
+    public function getMergedListingsItemsForEntireTable(
+        Listing $baseListing,
+        Listing $listing
+    ) {
+        $this->checkListingValidity($baseListing);
+        $this->checkListingValidity($listing);
+
         if (!$this->haveListingsSamePeriod($baseListing, $listing)) {
             throw new InvalidArgumentException(
                 'Given Listings must have same Period(Year and Month).'
@@ -411,21 +449,27 @@ class ListingFacade extends Object
      * @param Listing $baseListing
      * @param Listing $listingToMerge
      * @param array $selectedCollisionItems
+     * @param \App\Model\Entities\User|int|null $user
      * @return Listing
-     * @throws CollisionItemsOccurrenceException
-     * @throws CollisionItemsSelectionException
+     * @throws NoCollisionListingItemSelectedException
      * @throws \DibiException
      */
     public function mergeListings(
         Listing $baseListing,
         Listing $listingToMerge,
-        array $selectedCollisionItems = []
+        array $selectedCollisionItems = [],
+        $user = null
     ) {
+        $this->checkListingValidity($baseListing);
+        $this->checkListingValidity($listingToMerge);
+
         if (!$this->haveListingsSamePeriod($baseListing, $listingToMerge)) {
             throw new InvalidArgumentException(
                 'Given Listings must have same Period(Year and Month).'
             );
         }
+
+        $userID = $this->getUserID($user);
 
         $items = $this->itemService->getMergedListOfItems(
             $baseListing,
@@ -436,9 +480,11 @@ class ListingFacade extends Object
         try {
             $this->transaction->begin();
 
-            $newListing = new Listing();
-            $newListing->setPeriod($baseListing->year, $baseListing->month);
-            $newListing->user = $this->user->id;
+            $newListing = Listing::loadState(
+                $baseListing->year,
+                $baseListing->month,
+                $userID
+            );
 
             $this->saveListing($newListing);
 
@@ -460,17 +506,10 @@ class ListingFacade extends Object
 
     /**
      * @param array $listingItems
-     * @param Listing $listing
      */
-    private function persistListingItems(array $listingItems, Listing $listing)
+    private function persistListingItems(array $listingItems)
     {
-        $itemsRelatedToNewListing = $this->itemService
-                                         ->setListingForGivenItems(
-                                             $listingItems,
-                                             $listing
-                                         );
-
-        $this->listingItemRepository->saveListingItems($itemsRelatedToNewListing);
+        $this->listingItemRepository->saveListingItems($listingItems);
     }
 
     /**
@@ -485,6 +524,17 @@ class ListingFacade extends Object
         }
 
         return false;
+    }
+
+    /**
+     * @param Listing $listing
+     * @throws InvalidArgumentException
+     */
+    private function checkListingValidity(Listing $listing)
+    {
+        if ($listing->isDetached()) {
+            throw new InvalidArgumentException('Argument $listing must be attached Entity.');
+        }
     }
 
 }

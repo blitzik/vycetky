@@ -4,6 +4,9 @@ namespace Exceptions\Runtime;
 
     class RuntimeException extends \RuntimeException {}
 
+        // Entities
+        class DetachedEntityInstanceException extends RuntimeException {}
+
         // Users
         class DuplicateEntryException extends RuntimeException {}
     
@@ -56,11 +59,14 @@ namespace Exceptions\Runtime;
 
         class ListingPreviewNotFoundException extends RuntimeException {}
 
-        class CollisionItemsOccurrenceException extends RuntimeException {}
-
         class CollisionItemsSelectionException extends RuntimeException {}
+
+        class NoCollisionListingItemSelectedException extends RuntimeException {}
 
         // Messages
         class MessageLengthException extends RuntimeException {}
 
         class MessageNotFoundException extends RuntimeException {}
+
+        // WorkedHours
+        class OtherHoursZeroTimeException extends RuntimeException {}

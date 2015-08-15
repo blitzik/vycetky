@@ -2,6 +2,7 @@
 
 namespace App\Model\Entities;
 
+use Exceptions\Runtime\OtherHoursZeroTimeException;
 use Exceptions\Logic\InvalidArgumentException;
 use Nette\Utils\Validators;
 
@@ -17,6 +18,71 @@ use Nette\Utils\Validators;
 class ListingItem extends BaseEntity
 {
     /**
+     * @param int $day
+     * @param Listing $listing
+     * @param WorkedHours $workedHours
+     * @param Locality $locality
+     * @param string|null $description
+     * @param string|null $descOtherHours
+     * @return ListingItem
+     */
+    public static function loadState(
+        $day,
+        Listing $listing,
+        WorkedHours $workedHours,
+        Locality $locality,
+        $description = null,
+        $descOtherHours = null
+    ) {
+        $item = new self;
+        $item->setDay($day);
+        $item->setListing($listing);
+        $item->setLocality($locality);
+        $item->setDescription($description);
+
+        $item->setTime($workedHours, $descOtherHours);
+
+        return $item;
+    }
+
+    /**
+     * @param string|null $description
+     */
+    public function setDescription($description)
+    {
+        Validators::assert($description, 'string:..30|null');
+        $this->row->description = $description;
+    }
+
+    /**
+     * @param string $descOtherHours
+     * @param WorkedHours $workedHours
+     * @throws OtherHoursZeroTimeException
+     */
+    public function setTime(WorkedHours $workedHours, $descOtherHours = null)
+    {
+        $this->setWorkedHours($workedHours);
+        $this->setDescOtherHours($descOtherHours);
+    }
+
+    /**
+     * @param string|null $descOtherHours
+     * @throws OtherHoursZeroTimeException
+     */
+    private function setDescOtherHours($descOtherHours)
+    {
+        Validators::assert($descOtherHours, 'string:..30|null');
+
+        if (!empty($descOtherHours) and isset($this->row->workedHoursID)) {
+            if ($this->workedHours->otherHours->toSeconds() == 0) {
+                throw new OtherHoursZeroTimeException;
+            }
+        }
+
+        $this->row->descOtherHours = $descOtherHours;
+    }
+
+    /**
      * @return mixed
      */
     public function getListingID()
@@ -29,25 +95,17 @@ class ListingItem extends BaseEntity
      */
     public function setDay($day)
     {
-        $errMessage = 'Argument $day must be integer number';
-        if (!Validators::is($day, 'numericint')) {
-            throw new InvalidArgumentException($errMessage);
-        }
+        Validators::assert($day, 'numericint:1..31');
 
         if (!$this->isDetached()) {
             if (isset($this->listing)) {
                 $daysInMonth = $this->listing->getNumberOfDaysInMonth();
                 if ($day < 1 or $day > $daysInMonth) {
                     throw new InvalidArgumentException(
-                        $errMessage . ' between 1-' . $daysInMonth
+                        'Argument $day must be integer number
+                         between 1-' . $daysInMonth
                     );
                 }
-            }
-        } else {
-            if ($day < 1 or $day > 31 ) {
-                throw new InvalidArgumentException(
-                    $errMessage . 'between 1-31'
-                );
             }
         }
 
@@ -59,6 +117,8 @@ class ListingItem extends BaseEntity
      */
     public function setListing(Listing $listing)
     {
+        $listing->checkEntityState();
+
         $listingDaysInMonth = $listing->getNumberOfDaysInMonth();
         if (isset($this->day) and $this->day > $listingDaysInMonth) {
             throw new InvalidArgumentException(
@@ -66,5 +126,23 @@ class ListingItem extends BaseEntity
             );
         }
         $this->assignEntityToProperty($listing, 'listing');
+    }
+
+    /**
+     * @param WorkedHours $workedHours
+     */
+    private function setWorkedHours(WorkedHours $workedHours)
+    {
+        $workedHours->checkEntityState();
+        $this->assignEntityToProperty($workedHours, 'workedHours');
+    }
+
+    /**
+     * @param Locality $locality
+     */
+    public function setLocality(Locality $locality)
+    {
+        $locality->checkEntityState();
+        $this->assignEntityToProperty($locality, 'locality');
     }
 }

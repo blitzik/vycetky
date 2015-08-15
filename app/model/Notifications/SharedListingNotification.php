@@ -27,19 +27,19 @@ class SharedListingNotification extends Object
     ) {
         $period = TimeUtils::getMonthName($listing->month) . ' ' . $listing->year;
 
-        $m = new Message();
-        $m->sent = new \DateTime();
-        $m->subject = $this->constructSubject($senderName, $period);
-        $m->message = $this->constructMessage(
-            $senderName,
-            $recipientName,
-            $period,
-            $this->linkGenerator->link(
-                'Front:Listing:detail',
-                ['id' => $listing->listingID]
-            )
+        $m = Message::loadState(
+            $this->constructSubject($senderName, $period),
+            $this->constructMessage(
+                $senderName,
+                $recipientName,
+                $period,
+                $this->linkGenerator->link(
+                    'Front:Listing:detail',
+                    ['id' => $listing->listingID]
+                )
+            ),
+            0 // system
         );
-        $m->author = 0; // system
 
         return $m;
     }

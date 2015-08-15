@@ -4,6 +4,7 @@ namespace App\Model\Entities;
 
 use Exceptions\Logic\InvalidArgumentException;
 use App\Model\Time\TimeUtils;
+use Nette\Utils\Validators;
 use \InvoiceTime;
 use DateTime;
 
@@ -31,8 +32,50 @@ class Listing extends BaseEntity
     /**
      * @param int $year
      * @param int $month
+     * @param User|int $user
+     * @param string|null $description
+     * @param string|null $hourlyWage
+     * @return Listing
      */
-    public function setPeriod($year, $month)
+    public static function loadState(
+        $year,
+        $month,
+        $user,
+        $description = null,
+        $hourlyWage = null
+    ) {
+        $listing = new self;
+        $listing->setListingPeriod($year, $month);
+        $listing->setUser($user);
+        $listing->setDescription($description);
+        $listing->setHourlyWage($hourlyWage);
+
+        return $listing;
+    }
+
+    /**
+     * @param $user
+     */
+    public function setUser($user)
+    {
+        if ($user instanceof User and !$user->isDetached()) {
+            $this->assignEntityToProperty($user, 'user');
+        } else if (Validators::is($user, 'numericint')) {
+            $this->row->userID = $user;
+            $this->row->cleanReferencedRowsCache('user', 'userID');
+        } else {
+            throw new InvalidArgumentException(
+                'Argument $user can by only attached instance
+                 of App\Entities\User or integer number.'
+            );
+        }
+    }
+
+    /**
+     * @param int $year
+     * @param int $month
+     */
+    private function setListingPeriod($year, $month)
     {
         if (!is_int($year) or !is_int($month)) {
             throw new InvalidArgumentException(
@@ -50,6 +93,32 @@ class Listing extends BaseEntity
         $this->row->month = $month;
     }
 
+    /**
+     * @param string|null $description
+     */
+    public function setDescription($description)
+    {
+        $description = trim($description);
+        Validators::assert($description, 'string:..40|null');
+        $this->row->description = $description;
+    }
+
+    /**
+     * @param int|null $hourlyWage
+     */
+    public function setHourlyWage($hourlyWage)
+    {
+        Validators::assert($hourlyWage, 'none|numericint:0..|null');
+        if (empty($hourlyWage)) {
+            $hourlyWage = null;
+        }
+
+        $this->row->hourlyWage = $hourlyWage;
+    }
+
+    /**
+     * @return bool
+     */
     public function isActual()
     {
         if ($this->getPeriod()->format('Y-m') == (new \DateTime())->format('Y-m'))
@@ -58,11 +127,9 @@ class Listing extends BaseEntity
         return false;
     }
 
-    public function getItems()
-    {
-        return $this->listingItems;
-    }
-
+    /**
+     * @return bool|DateTime
+     */
     public function getPeriod()
     {
         return TimeUtils::getDateTimeFromParameters(
@@ -71,6 +138,9 @@ class Listing extends BaseEntity
         );
     }
 
+    /**
+     * @return int
+     */
     public function getNumberOfDaysInMonth()
     {
         if (!isset($this->numberOfDaysInListingMonth)) {
@@ -83,11 +153,14 @@ class Listing extends BaseEntity
         return $this->numberOfDaysInListingMonth;
     }
 
+    /**
+     * @return string
+     */
     public function entireDescription()
     {
-        $desc = TimeUtils::getMonthName($this->month) . ' ' . $this->year;
-        if ($this->description != null) { // != intentionally
-            $desc .= ' - '.$this->description;
+        $desc = TimeUtils::getMonthName($this->row->month) . ' ' . $this->row->year;
+        if (isset($this->row->description)) { // != intentionally
+            $desc .= ' - '.$this->row->description;
         }/* else {
             $desc .= ' - Bez popisu';
         }*/
@@ -95,9 +168,59 @@ class Listing extends BaseEntity
         return $desc;
     }
 
+    /**
+     * @return mixed
+     */
     public function getOwnerID()
     {
         return $this->row->userID;
     }
+
+    /**
+     * @return InvoiceTime
+     */
+    public function getLunchHours()
+    {
+        $this->checkEntityState();
+        return $this->toInvoiceTime($this->row->lunchHours);
+    }
+
+    /**
+     * @return InvoiceTime
+     */
+    public function getOtherHours()
+    {
+        $this->checkEntityState();
+        return $this->toInvoiceTime($this->row->otherHours);
+    }
+
+    /**
+     * @return InvoiceTime
+     */
+    public function getWorkedHours()
+    {
+        $this->checkEntityState();
+        return $this->toInvoiceTime($this->row->workedHours);
+    }
+
+    /**
+     * @return InvoiceTime
+     */
+    public function getTotalWorkedHours()
+    {
+        $this->checkEntityState();
+        return $this->toInvoiceTime($this->row->totalWorkedHours);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getWorkedDays()
+    {
+        $this->checkEntityState();
+        return $this->row->workedDays;
+    }
+
+
 
 }

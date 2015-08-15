@@ -2,12 +2,10 @@
 
 namespace App\Model\Services;
 
-use Exceptions\Runtime\CollisionItemsOccurrenceException;
-use Exceptions\Runtime\CollisionItemsSelectionException;
+use Exceptions\Runtime\NoCollisionListingItemSelectedException;
 use Exceptions\Logic\InvalidArgumentException;
 use App\Model\Domain\ListingItemDecorator;
 use App\Model\Time\TimeUtils;
-use blitzik\Arrays\Arrays;
 use App\Model\Entities;
 use Nette\Object;
 
@@ -22,7 +20,8 @@ class ItemService extends Object
     {
         $collection = [];
         foreach ($listingItems as $listingItem) {
-            if (!$listingItem instanceof Entities\ListingItem) {
+            if (!$listingItem instanceof Entities\ListingItem or
+                $listingItem->isDetached()) {
                 throw new InvalidArgumentException(
                     'Invalid set of ListingItems given.'
                 );
@@ -178,8 +177,7 @@ class ItemService extends Object
      * @param Entities\Listing $listingToMerge
      * @param array $selectedCollisionItems
      * @return array
-     * @throws CollisionItemsOccurrenceException
-     * @throws CollisionItemsSelectionException
+     * @throws NoCollisionListingItemSelectedException
      */
     public function getMergedListOfItems(
         Entities\Listing $baseListing,
@@ -193,25 +191,25 @@ class ItemService extends Object
                                 $listingToMerge->listingItems
                             );
 
-        $ciCount = count($selectedCollisionItems);
-        $mergedItemsDaysCount = count($mergedItems);
-        $daysCountIncludingCollisionItems = Arrays::count_recursive($mergedItems, 1);
-
-        if (($daysCountIncludingCollisionItems - $ciCount) > $mergedItemsDaysCount) {
-            throw new CollisionItemsOccurrenceException;
-        }
-
-        if (($daysCountIncludingCollisionItems - $ciCount) < $mergedItemsDaysCount) {
-            throw new CollisionItemsSelectionException;
-        }
-
+        $numberOfCheckedCollisionItems = null;
         $items = array();
         foreach ($mergedItems as $day => $listingItems) {
+            $numberOfCheckedCollisionItems = 0;
+
             foreach ($listingItems as $item) {
                 if (count($listingItems) > 1) {
                     if (array_key_exists($item->listingItemID, $selectedCollisionItems)) {
+                        // it will always make clone of the first found item (from base listing)
                         $items[] = clone $item;
+                        break;
                     }
+                    $numberOfCheckedCollisionItems++;
+                    if ($numberOfCheckedCollisionItems >= 2) {
+                        // One day can have max. 2 colliding items
+                        // and if none of them is selected, throw exception
+                        throw new NoCollisionListingItemSelectedException;
+                    }
+
                 } else {
 
                     $items[] = clone $item;

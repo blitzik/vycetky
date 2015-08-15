@@ -22,7 +22,7 @@
 </tr>
 </thead>
 {foreach $messages as $message}
-<tr n:class="($message->isReceived() and $message->isSystemMessage()) ? m-system-message : $iterator->isOdd() ? null : m-odd">
+<tr n:class="($message->isReceived() and $message->isSystemMessage()) ? m-system-message : ($iterator->isOdd() ? null : m-odd)">
     <td>
         <input type="checkbox" name="msg[]"
                value="{$message->messageID}"

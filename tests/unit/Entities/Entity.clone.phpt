@@ -1,11 +1,10 @@
 <?php
 
-require '../bootstrap.php';
+require '../../bootstrap.php';
 
 use Tester\Assert;
 
-$wh = new \App\Model\Entities\WorkedHours();
-$wh->setHours(
+$wh = \App\Model\Entities\WorkedHours::loadState(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:00')
@@ -13,8 +12,7 @@ $wh->setHours(
 
 Assert::same(true, $wh->isDetached());
 
-$wh->makeAlive($entityFactory, $connection, $mapper);
-$wh->attach(1);
+$_er->makeAlive($wh, 1);
 
 Assert::same(false, $wh->isDetached());
 

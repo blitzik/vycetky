@@ -4,16 +4,16 @@ namespace App\Model\Facades;
 
 use App\Model\Repositories\UserMessageRepository;
 use Exceptions\Logic\InvalidArgumentException;
+use Exceptions\Runtime\MessageLengthException;
 use App\Model\Repositories\MessageRepository;
 use App\Model\Repositories\UserRepository;
 use App\Model\Entities\UserMessage;
 use App\Model\Entities\Message;
-use Exceptions\Runtime\MessageLengthException;
+use Nette\Utils\Validators;
 use Nette\Security\User;
 use Tracy\Debugger;
-use Nette\Object;
 
-class MessagesFacade extends Object
+class MessagesFacade extends BaseFacade
 {
 
     /**
@@ -37,12 +37,6 @@ class MessagesFacade extends Object
      */
     private $transaction;
 
-    /**
-     * @var User
-     */
-    private $user;
-
-
     public function __construct(
         MessageRepository $messageRepository,
         UserMessageRepository $umr,
@@ -51,12 +45,13 @@ class MessagesFacade extends Object
         UserRepository $ur,
         User $user
     ) {
+        parent::__construct($user);
+
         $this->messageRepository = $messageRepository;
         $this->userMessageRepository = $umr;
         $this->transaction = $transaction;
         $this->messageRepository = $mr;
         $this->userRepository = $ur;
-        $this->user = $user;
     }
 
 
@@ -91,15 +86,24 @@ class MessagesFacade extends Object
 
     /**
      * @param string $messageType unread or read
-     * @param $offset
-     * @param $length
+     * @param int $offset
+     * @param int $length
+     * @param User|int|null $user
      * @return Message[]
      */
-    public function findReceivedMessages($messageType, $offset, $length)
-    {
+    public function findReceivedMessages(
+        $messageType,
+        $offset,
+        $length,
+        $user = null
+    ) {
+        Validators::assert($offset, 'numericint');
+        Validators::assert($length, 'numericint');
+        $userID = $this->getUserID($user);;
+
         return $this->messageRepository
                     ->findReceivedMessages(
-                        $this->user->id,
+                        $userID,
                         $messageType,
                         $offset,
                         $length
@@ -108,31 +112,40 @@ class MessagesFacade extends Object
 
     /**
      * @param string $messageType unread or read
+     * @param User|int|null $user
      * @return int
      */
-    public function getNumberOfReceivedMessages($messageType)
+    public function getNumberOfReceivedMessages($messageType, $user = null)
     {
+        $userID = $this->getUserID($user);
+
         return $this->messageRepository
-                    ->getNumberOfReceivedMessages($this->user->id, $messageType);
+                    ->getNumberOfReceivedMessages($userID, $messageType);
     }
 
     /**
-     * @param $offset
-     * @param $length
+     * @param int $offset
+     * @param int $length
+     * @param User|int|null $user
      * @return Message[]
      */
-    public function findSentMessages($offset, $length)
+    public function findSentMessages($offset, $length, $user = null)
     {
+        $userID = $this->getUserID($user);
+
         return $this->messageRepository
-                    ->findSentMessages($this->user->id, $offset, $length);
+                    ->findSentMessages($userID, $offset, $length);
     }
 
     /**
+     * @param User|int|null $user
      * @return int
      */
-    public function getNumberOfSentMessages()
+    public function getNumberOfSentMessages($user = null)
     {
-        return $this->messageRepository->getNumberOfSentMessages($this->user->id);
+        $userID = $this->getUserID($user);
+
+        return $this->messageRepository->getNumberOfSentMessages($userID);
     }
 
     /**
@@ -148,19 +161,13 @@ class MessagesFacade extends Object
         try {
             $this->transaction->begin();
 
-                $message = new Message();
-                $message->subject = $subject;
-                $message->message = $text;
-                $message->sent = new \DateTime();
-                $message->author = $authorID;
+                $message = Message::loadState($subject, $text, $authorID);
 
                 $this->messageRepository->persist($message);
 
                 $userMessages = [];
                 foreach ($recipientsIDs as $recipientID) {
-                    $um = new UserMessage();
-                    $um->message = $message;
-                    $um->recipient = $recipientID;
+                    $um = UserMessage::loadState($message, $recipientID);
 
                     $userMessages[] = $um;
                 }
@@ -205,9 +212,7 @@ class MessagesFacade extends Object
 
             $recipientsMessages = [];
             foreach ($messages as $recipientID => $message) {
-                $recipientMessage = new UserMessage();
-                $recipientMessage->message = $message;
-                $recipientMessage->recipient = $recipientID;
+                $recipientMessage = UserMessage::loadState($message, $recipientID);
 
                 $recipientsMessages[] = $recipientMessage;
             }
@@ -226,13 +231,16 @@ class MessagesFacade extends Object
 
     /**
      * @param int $messageID
+     * @param User|int|null $user
      * @param string $type received or sent
      */
-    public function removeMessage($messageID, $type)
+    public function removeMessage($messageID, $type, $user = null)
     {
+        $userID = $this->getUserID($user);
+
         $this->callMessageActionBasedOnType(
             $type,
-            [$messageID, $this->user->id],
+            [$messageID, $userID],
             function ($messageID, $recipientID) {
                 $this->userMessageRepository
                      ->removeMessage($messageID, $recipientID);
@@ -245,11 +253,18 @@ class MessagesFacade extends Object
         );
     }
 
-    public function removeMessages(array $messagesIDs, $type)
+    /**
+     * @param array $messagesIDs
+     * @param string$type
+     * @param User|int|null $user
+     */
+    public function removeMessages(array $messagesIDs, $type, $user = null)
     {
+        $userID = $this->getUserID($user);
+
         $this->callMessageActionBasedOnType(
             $type,
-            [$messagesIDs, $this->user->id],
+            [$messagesIDs, $userID],
             function ($messagesIDs, $recipientID) {
                 $this->userMessageRepository
                      ->removeMessages($messagesIDs, $recipientID);

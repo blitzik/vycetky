@@ -125,10 +125,11 @@ class UserManager extends Nette\Object
 
     /**
      * @param User $user
+     * @return int User ID
      */
     public function saveUser(User $user)
     {
-        $this->userRepository->persist($user);
+        return $this->userRepository->persist($user);
     }
 
     /**
@@ -195,10 +196,11 @@ class UserManager extends Nette\Object
         $regHash = \Nette\Utils\Random::generate(32);
         $currentDate = new \DateTime;
 
-        $invitation = new Invitation;
-        $invitation->email = $email;
-        $invitation->regHash = $regHash;
-        $invitation->validity = $currentDate->modify('+1 week');
+        $invitation = Invitation::loadState(
+            $email,
+            $regHash,
+            $currentDate->modify('+1 week')
+        );
 
         $this->invitationRepository->persist($invitation);
 
@@ -221,8 +223,6 @@ class UserManager extends Nette\Object
     ) {
         if ($user->email != $invitation->email)
             throw new Runtime\InvalidUserInvitationEmailException;
-
-        $user->password = Passwords::hash($user->password);
 
         try {
             $this->transaction->begin();

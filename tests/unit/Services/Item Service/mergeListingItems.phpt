@@ -2,7 +2,7 @@
 
 use Tester\Assert;
 
-require '../../bootstrap.php';
+require '../../../bootstrap.php';
 
 $service = new \App\Model\Services\ItemService();
 
@@ -19,7 +19,7 @@ for ($i = 2; $i <= 4; $i += 2) { // Items days 1 and 3
     $item = new \App\Model\Entities\ListingItem();
     $item->setDay($i - 1);
     $item->locality = $locality;
-    $item->workedHours = $workedHours;
+    $item->setTime($workedHours);
 
     $_er->makeAlive($item, $i - 1);
 
@@ -28,7 +28,7 @@ for ($i = 2; $i <= 4; $i += 2) { // Items days 1 and 3
     $item2 = new \App\Model\Entities\ListingItem();
     $item2->setDay($i - 1);
     $item2->locality = $locality;
-    $item2->workedHours = $workedHours;
+    $item2->setTime($workedHours);
 
     $_er->makeAlive($item2, $i);
 
@@ -47,7 +47,7 @@ $_er->makeAlive($loc2, 2);
 $li = new \App\Model\Entities\ListingItem();
 $li->setDay(6);
 $li->locality = $loc2;
-$li->workedHours = $workedHours;
+$li->setTime($workedHours);
 $_er->makeAlive($li, 20);
 
 $baseItems[] = $li;
@@ -57,7 +57,7 @@ $baseItems[] = $li;
 $li3 = new \App\Model\Entities\ListingItem();
 $li3->setDay(10);
 $li3->locality = $locality;
-$li3->workedHours = $workedHours;
+$li3->setTime($workedHours);
 $_er->makeAlive($li3, 30);
 
 $baseItems[] = $li3;
@@ -68,7 +68,7 @@ $_er->makeAlive($wh, 5);
 $li4 = new \App\Model\Entities\ListingItem();
 $li4->setDay(10);
 $li4->locality = $loc2;
-$li4->workedHours = $wh;
+$li4->setTime($wh);
 $_er->makeAlive($li4, 40);
 
 $items[] = $li4;

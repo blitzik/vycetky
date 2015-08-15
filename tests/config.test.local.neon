@@ -1,0 +1,22 @@
+parameters:
+	mainEmail: 'admin@email.em'
+
+	backup:
+		database:
+			password: 'password'
+
+	database:
+		driver: mysql
+		host: 127.0.0.1
+		username: root
+		password: asqw
+		database: invoicetest
+		lazy: true
+		profiler: true
+
+	company:
+		name: 'Company name'
+
+	emails:
+		system: 'system@email.em'
+		admin: %mainEmail%
