@@ -87,7 +87,7 @@ class Message extends BaseEntity
     private function setAuthor($author)
     {
         if ($author instanceof User and !$author->isDetached()) {
-            $this->assignEntityToProperty($author, 'user');
+            $this->assignEntityToProperty($author, 'author');
         } else if (Validators::is($author, 'numericint')) {
             $this->row->author = $author;
             $this->row->cleanReferencedRowsCache('user', 'author');

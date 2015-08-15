@@ -52,10 +52,6 @@ class WorkedHours extends BaseEntity
             );
         }
 
-        /*
-        $this->row->hours = $this->getHours()->getTime();
-        $this->row->totalWorkedHours = $this->getTotalWorkedHours()->getTime();*/
-
         $wh = new WorkedHours();
         $wh->setWorkStart($workStart);
         $wh->setWorkEnd($workEnd);

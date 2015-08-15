@@ -149,25 +149,25 @@ class MessagesFacade extends BaseFacade
     }
 
     /**
-     * @param $subject
-     * @param $text
-     * @param $authorID
-     * @param array $recipientsIDs
+     * @param string $subject
+     * @param string $text
+     * @param \App\Model\Entities\User|int $author
+     * @param array $recipients IDs or App\Entities\User instances
      * @throws MessageLengthException
      * @throws \DibiException
      */
-    public function sendMessage($subject, $text, $authorID, array $recipientsIDs)
+    public function sendMessage($subject, $text, $author, array $recipients)
     {
         try {
             $this->transaction->begin();
 
-                $message = Message::loadState($subject, $text, $authorID);
+                $message = Message::loadState($subject, $text, $author);
 
                 $this->messageRepository->persist($message);
 
                 $userMessages = [];
-                foreach ($recipientsIDs as $recipientID) {
-                    $um = UserMessage::loadState($message, $recipientID);
+                foreach ($recipients as $recipient) {
+                    $um = UserMessage::loadState($message, $recipient);
 
                     $userMessages[] = $um;
                 }

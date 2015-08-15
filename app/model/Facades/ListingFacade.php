@@ -282,10 +282,11 @@ class ListingFacade extends BaseFacade
                 $workedHours = $this->itemFacade
                                     ->setupWorkedHoursEntity($workedHours);
 
+                $whInSecs = $workedHours->otherHours->toSeconds();
                 foreach ($itemsToChange as $item) {
-                    $descOtherHours = $item->descOtherHours;
-                    if ($workedHours->otherHours->toSeconds() == 0) {
-                        $descOtherHours = null;
+                    $descOtherHours = null;
+                    if (isset($item->descOtherHours) and $whInSecs > 0) {
+                            $descOtherHours = $item->descOtherHours;
                     }
                     $item->setTime($workedHours, $descOtherHours);
                 }

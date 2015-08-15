@@ -25,10 +25,6 @@ class Invitation extends BaseEntity
         $regHash,
         DateTime $validity
     ) {
-        /*$this->setEmail($email);
-        $this->setRegHash($regHash);
-        $this->setValidity($validity);*/
-
         $invitation = new self;
         $invitation->setEmail($email);
         $invitation->setRegHash($regHash);

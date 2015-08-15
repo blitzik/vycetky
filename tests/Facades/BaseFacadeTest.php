@@ -236,6 +236,45 @@ abstract class BaseFacadeTest extends \Tester\TestCase
 
         return $items;*/
     }
+
+    /**
+     * @param $username
+     * @param $email
+     * @return \App\Model\Entities\User
+     * @throws DibiException
+     */
+    public function generateUser(
+        $username,
+        $email = null
+    ) {
+        $values = [
+            'username' => $username,
+            'password' => \Nette\Security\Passwords::hash('abcd'),
+            'ip' => '127.0.0.1',
+            'lastLogin' => '2015-05-01 06:00:00',
+            'lastIP' => '127.0.0.1'
+        ];
+
+        if ($email === null) {
+            $email = $username . '@' . $username . '.abc';
+        }
+
+        $values['email'] = $email;
+
+        $this->connection->insert('user', $values)->execute();
+        $id = $this->connection->getInsertId();
+
+        $user = \App\Model\Entities\User::loadState(
+            $values['username'],
+            $values['password'],
+            $values['email'],
+            $values['ip']
+        );
+
+        $this->makeEntityAlive($user, $id);
+
+        return $user;
+    }
 }
 
 return $container;

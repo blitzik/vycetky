@@ -38,14 +38,15 @@ class UserMessage extends BaseEntity
     }
 
     /**
-     * @param $recipient
+     * @param User|int $recipient
      */
     private function setRecipient($recipient)
     {
         if ($recipient instanceof User and !$recipient->isDetached()) {
-            $this->assignEntityToProperty($recipient, 'user');
+            $this->assignEntityToProperty($recipient, 'recipient');
         } else if (Validators::is($recipient, 'numericint')) {
             $this->row->recipient = $recipient;
+            $this->row->cleanReferencedRowsCache('user', 'recipient');
         } else {
             throw new InvalidArgumentException(
                 'Argument $recipient can by only instance of App\Entities\User or

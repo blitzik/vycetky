@@ -1,6 +1,9 @@
 <?php
 
-
+/**
+ * Class EntityFactory
+ * @deprecated
+ */
 class EntityFactory extends \Nette\Object implements \LeanMapper\IEntityFactory
 {
     /**
