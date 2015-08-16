@@ -11,13 +11,13 @@ use DateTime;
  * @property string $username
  * @property string $password
  * @property string $email
- * @property string|null $name
+ * @property string|null $name = null
  * @property string $role = 'employee'
  * @property-read string $ip
  * @property DateTime $lastLogin
  * @property string $lastIP
- * @property string|null $token
- * @property DateTime|null $tokenValidity
+ * @property-read string|null $token = null
+ * @property-read DateTime|null $tokenValidity = null
  */
 class User extends BaseEntity
 {
@@ -137,22 +137,19 @@ class User extends BaseEntity
         $this->row->lastIP = $this->validateIPAddress($lastIP);
     }
 
-    /**
-     * @param null|string $token
-     */
-    public function setToken($token)
+    public function createToken()
     {
-        Validators::assert($token, 'string:32|null');
+        $this->row->token = \Nette\Utils\Random::generate(32);
 
-        $this->row->token = $token;
-    }
+        $currentDay = new \DateTime();
+        $tokenValidity = $currentDay->modify('+1 day');
 
-    /**
-     * @param DateTime|null $tokenValidity
-     */
-    public function setTokenValidity($tokenValidity = null)
-    {
         $this->row->tokenValidity = $tokenValidity;
     }
 
+    public function resetToken()
+    {
+        $this->row->token = null;
+        $this->row->tokenValidity = null;
+    }
 }

@@ -89,9 +89,7 @@ class UserManager extends Nette\Object
      */
     public function resetToken(User $user)
     {
-        $user->token = null;
-        $user->tokenValidity = null;
-
+        $user->resetToken();
         $this->userRepository->persist($user);
     }
 
@@ -134,13 +132,7 @@ class UserManager extends Nette\Object
     {
         $user = $this->findUserByEmail($email);
 
-        $token = \Nette\Utils\Random::generate(32);
-
-        $currentDay = new \DateTime();
-        $tokenValidity = $currentDay->modify('+1 day');
-
-        $user->token = $token;
-        $user->tokenValidity = $tokenValidity;
+        $user->createToken();
 
         $this->userRepository->persist($user);
 
