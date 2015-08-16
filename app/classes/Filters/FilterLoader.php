@@ -98,4 +98,27 @@ class FilterLoader extends Object
 
         return $text;
     }
+
+    /**
+     * @param \DateTime $date
+     * @return bool
+     */
+    public function isCurrentDay(\DateTime $date)
+    {
+        if ($date->format('Y-m-d') == (new \DateTime('now'))->format('Y-m-d'))
+            return true;
+
+        return false;
+    }
+
+    /**
+     * @param \DateTime $date
+     * @return bool
+     */
+    public function isWeekDay(\DateTime $date)
+    {
+        $d = date_format($date, 'w');
+
+        return ($d > 0 && $d < 6) ? true : false;
+    }
 }

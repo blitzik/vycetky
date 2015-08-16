@@ -168,59 +168,30 @@ class ItemFacade extends BaseFacade
     }
 
     /**
-     * @param ListingItem[] $listingItems Array of ListingItems
+     * @param array $listingItems
      * @return array Array of ListingItemDecorators
      */
-    public function createListingItemDecoratorsCollection(
-        array $listingItems,
-        $year,
-        $month
-    ) {
-        Validators::assert($year, 'numericint');
-        Validators::assert($month, 'numericint');
-
-        return $this->itemService->createDecoratorsCollection(
-            $listingItems,
-            $year,
-            $month
-        );
+    public function createListingItemDecoratorsCollection(array $listingItems)
+    {
+        return $this->itemService->createDecoratorsCollection($listingItems);
     }
 
     /**
-     * @param ListingItemDecorator[] $listingItemsDecorators
-     * @param \DateTime $period
-     * @return ListingItemDecorator[] Returns Array of ListingItemDecorators for every day of given Month
-     */
-    public function generateListingItemDecoratorsForEntireTable(
-        array $listingItemsDecorators,
-        \DateTime $period
-    ) {
-        return $this->itemService
-                    ->generateListingItemDecoratorsForEntireTable(
-                        $listingItemsDecorators,
-                        $period->format('Y'),
-                        $period->format('n')
-                    );
-    }
-
-    /**
-     * @param ListingItem[] $listingItems
-     * @param \DateTime $period
+     * @param Listing $listing
      * @return ListingItemDecorator[]
      */
     public function generateEntireTable(
-        array $listingItems,
-        \DateTime $period
+        Listing $listing
     ) {
+        $listing->checkEntityState();
+
         $collectionOfDecorators = $this->createListingItemDecoratorsCollection(
-            $listingItems,
-            $period->format('Y'),
-            $period->format('n')
+            $listing->listingItems
         );
 
-        return $this->generateListingItemDecoratorsForEntireTable(
+        return $this->itemService->generateListingItemDecoratorsForEntireTable(
             $collectionOfDecorators,
-            $period
+            $listing->getPeriod()
         );
     }
 

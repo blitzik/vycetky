@@ -4,13 +4,13 @@ use Tester\Assert;
 
 require '../../bootstrap.php';
 
-$workedHours = \App\Model\Entities\WorkedHours::loadState(
+$workedHours = new \App\Model\Entities\WorkedHours(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:00')
 );
 
-$workedHours2 = \App\Model\Entities\WorkedHours::loadState(
+$workedHours2 = new \App\Model\Entities\WorkedHours(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:00')
@@ -20,7 +20,7 @@ Assert::same(true, $workedHours->compare($workedHours2));
 
 //////////
 
-$workedHours2 = \App\Model\Entities\WorkedHours::loadState(
+$workedHours2 = new \App\Model\Entities\WorkedHours(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:30')

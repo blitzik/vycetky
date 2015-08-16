@@ -2,18 +2,12 @@
 
 namespace App\FrontModule\Presenters;
 
-use App\Model\Entities\Invitation;
-use App\Model\Entities\Listing;
-use App\Model\Entities\ListingItem;
-use App\Model\Entities\WorkedHours;
-use App\Model\Facades\ItemFacade;
-use App\Model\Repositories\ListingItemRepository;
-use App\Model\Repositories\ListingRepository;
-use App\Model\Repositories\LocalityRepository;
 use App\Model\Repositories\WorkedHoursRepository;
+use App\Model\Repositories\ListingItemRepository;
+use App\Model\Repositories\LocalityRepository;
+use App\Model\Repositories\ListingRepository;
+use App\Model\Facades\ItemFacade;
 use LeanMapper\Connection;
-use Nette\Utils\DateTime;
-use Nette\Utils\Validators;
 
 class TestPresenter extends SecurityPresenter
 {
@@ -55,7 +49,7 @@ class TestPresenter extends SecurityPresenter
 
     public function actionDefault()
     {
-        dump(filter_var('0:az0::0', FILTER_VALIDATE_IP, ['flags' => [FILTER_FLAG_IPV4, FILTER_FLAG_IPV6]]));
+
     }
 
     public function renderDefault()

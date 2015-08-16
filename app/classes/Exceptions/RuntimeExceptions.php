@@ -7,6 +7,8 @@ namespace Exceptions\Runtime;
         // Entities
         class DetachedEntityInstanceException extends RuntimeException {}
 
+        class InvalidMemberTypeException extends RuntimeException {}
+
         // Users
         class DuplicateEntryException extends RuntimeException {}
     

@@ -161,13 +161,13 @@ class MessagesFacade extends BaseFacade
         try {
             $this->transaction->begin();
 
-                $message = Message::loadState($subject, $text, $author);
+                $message = new Message($subject, $text, $author);
 
                 $this->messageRepository->persist($message);
 
                 $userMessages = [];
                 foreach ($recipients as $recipient) {
-                    $um = UserMessage::loadState($message, $recipient);
+                    $um = new UserMessage($message, $recipient);
 
                     $userMessages[] = $um;
                 }
@@ -212,7 +212,7 @@ class MessagesFacade extends BaseFacade
 
             $recipientsMessages = [];
             foreach ($messages as $recipientID => $message) {
-                $recipientMessage = UserMessage::loadState($message, $recipientID);
+                $recipientMessage = new UserMessage($message, $recipientID);
 
                 $recipientsMessages[] = $recipientMessage;
             }

@@ -46,17 +46,18 @@
 </tr>
 
 {foreach $mergedListingsItems as $day => $listingItems}
-    {if count($listingItems) > 1}
+    {var $itemsCount = count($listingItems)}
+    {if $itemsCount > 1}
         {foreach $listingItems as $item}
             {var $IDs[] = $item->listingItemID} {* key 0 => baseListing | 1 => listing to merge *}
         {/foreach}
     {/if}
     {foreach $listingItems as $item}
-    <tr n:class="(count($listingItems) > 1 and $item->getListingID() == $baseListing->listingID) ? baseListing : (count($listingItems) > 1 ? listingToMerge : ($item->isWeekDay() ? weekDay : null))"
+    <tr n:class="($itemsCount > 1 and !$item->isFilling() and $item->isItemFromBaseListing()) ? baseListing : ($itemsCount > 1 ? listingToMerge : ($item->isWeekDay() ? weekDay : null))"
         {if !$item->isFilling()}id="rowID-{$item->listingItemID}"{/if}>
 
-        <td n:class="(count($listingItems) > 1 and $item->getListingID() == $baseListing->listingID) ? baseListing : (count($listingItems) > 1 ? listingToMerge : ($item->isWeekDay() ? weekDayHighlight : null))">{$day}</td>
-        <td n:class="(count($listingItems) > 1 and $item->getListingID() == $baseListing->listingID) ? baseListing : (count($listingItems) > 1 ? listingToMerge : ($item->isWeekDay() ? weekDayHighlight : null))">{$item->day|dayShortcut}</td>
+        <td n:class="($itemsCount > 1 and !$item->isFilling() and $item->isItemFromBaseListing()) ? baseListing : ($itemsCount > 1 ? listingToMerge : ($item->isWeekDay() ? weekDayHighlight : null))">{$day}</td>
+        <td n:class="($itemsCount > 1 and !$item->isFilling() and $item->isItemFromBaseListing()) ? baseListing : ($itemsCount > 1 ? listingToMerge : ($item->isWeekDay() ? weekDayHighlight : null))">{$item->day|dayShortcut}</td>
 
         {if !$item->isFilling()}
             {var $description = $item->description != null ? ' ('. $item->description . ')' : NULL}

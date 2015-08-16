@@ -24,7 +24,6 @@ class PasswordPresenter extends BasePresenter
     public $userManager;
 
     /**
-     *
      * @var \App\Model\Entities\User
      */
     private $user;
@@ -108,7 +107,6 @@ class PasswordPresenter extends BasePresenter
                                  že jste si jisti tím, že se v systému tento E-mail nacházel, zkuste pro více informací
                                  kontaktovat správce na adrese <strong>'.$this->systemEmail.'</strong>.', 'error');
             $this->redirect('Password:reset');
-
         }
 
         if ($this->user->token == NULL) {
@@ -181,7 +179,11 @@ class PasswordPresenter extends BasePresenter
         }
 
         try {
-            $this->userManager->changePassword($this->user, $values['password']);
+            $this->user->token = null;
+            $this->user->tokenValidity = null;
+            $this->user->password = $values['password'];
+
+            $this->userManager->saveUser($this->user);
 
         } catch (\DibiException $e) {
             $this->flashMessage('<strong>Chyba!</strong> Při pokusu o změnu hesla došlo k chybě. Na nápravě se pracuje. Zkuste to prosím později.', 'error');

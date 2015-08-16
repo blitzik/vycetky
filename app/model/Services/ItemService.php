@@ -5,6 +5,8 @@ namespace App\Model\Services;
 use Exceptions\Runtime\NoCollisionListingItemSelectedException;
 use Exceptions\Logic\InvalidArgumentException;
 use App\Model\Domain\ListingItemDecorator;
+use App\Model\Domain\IDisplayableItem;
+use App\Model\Domain\FillingItem;
 use App\Model\Time\TimeUtils;
 use App\Model\Entities;
 use Nette\Object;
@@ -62,36 +64,34 @@ class ItemService extends Object
     }
 
     /**
-     *
-     * @param Entities\ListingItem[] $listingItems Array of ListingItems
-     * @param int $year
-     * @param int $month
+     * @param array $listingItems
      * @return array Array of ListingItemDecorators
      */
     public function createDecoratorsCollection(
-        array $listingItems,
-        $year,
-        $month
+        array $listingItems
     ) {
         $collection = [];
         foreach ($listingItems as $listingItem) {
-            if (!$listingItem instanceof Entities\ListingItem) {
+            if ($listingItem instanceof FillingItem) {
+                $collection[$listingItem->day->format('j')] = $listingItem;
+
+            } else if ($listingItem instanceof Entities\ListingItem and
+                      !$listingItem->isDetached()) {
+                $collection[$listingItem->day] = new ListingItemDecorator($listingItem);
+            } else {
                 throw new InvalidArgumentException(
-                    'Invalid set of ListingItems given.'
+                    'Only instances of Entities\ListingItem or Domain\FillingItem can be processed'
                 );
             }
-
-            $collection[$listingItem->day] = new ListingItemDecorator(
-                $listingItem,
-                $year,
-                $month
-            );
         }
 
         return $collection;
     }
 
     /**
+     * If there are 2 items in one particular day, the item from
+     * base listing is always the first one
+     *
      * @param array $baseItems
      * @param array $items
      * @return array
@@ -140,32 +140,31 @@ class ItemService extends Object
 
     /**
      * @param ListingItemDecorator[] $listingItemsDecorators
-     * @param int $year
-     * @param int $month
-     * @return ListingItemDecorator[] Returns Array of ListingItemDecorators for every day of given Month
+     * @param \DateTime $period
+     * @return array
      */
     public function generateListingItemDecoratorsForEntireTable(
         array $listingItemsDecorators,
-        $year,
-        $month
+        \DateTime $period
     ) {
+        $year = $period->format('Y');
+        $month = $period->format('n');
         $daysInMonth = TimeUtils::getNumberOfDaysInMonth($year, $month);
 
         $list = [];
         for ($day = 1; $day <= $daysInMonth; $day++) {
             if (array_key_exists($day, $listingItemsDecorators)) {
-                if (!$listingItemsDecorators[$day] instanceof ListingItemDecorator) {
+                if (!$listingItemsDecorators[$day] instanceof IDisplayableItem) {
                     throw new InvalidArgumentException(
-                        'Only instances of ListingItemDecorator with
-                         compatible Month and Year can pass.'
+                        'Only instances of ListingItemDecorator can pass.'
                     );
                 }
                 $list[$day] = $listingItemsDecorators[$day];
             } else {
 
-                $li = new Entities\ListingItem();
-                $li->setDay($day);
-                $list[$day] = new ListingItemDecorator($li, $year, $month);
+                $list[$day] = new FillingItem(
+                    TimeUtils::getDateTimeFromParameters($year, $month, $day)
+                );
             }
         }
 
@@ -225,7 +224,7 @@ class ItemService extends Object
      * (not Detached)
      * @param $listingItem
      */
-    private function checkListingItemValidity($listingItem)
+    public function checkListingItemValidity($listingItem)
     {
         if (!$listingItem instanceof Entities\ListingItem or
              $listingItem->isDetached()) {

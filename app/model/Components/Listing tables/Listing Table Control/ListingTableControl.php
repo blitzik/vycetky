@@ -3,7 +3,9 @@
 namespace App\Model\Components\ListingTable;
 
 use App\Model\Components\ItemsTable\IItemsTableControlFactory;
+use App\Model\Domain\FillingItem;
 use Exceptions\Runtime\DayExceedCurrentMonthException;
+use Nette\Utils\DateTime;
 use Nextras\Application\UI\SecuredLinksControlTrait;
 use Exceptions\Runtime\ListingItemNotFoundException;
 use Exceptions\Runtime\ListingNotFoundException;
@@ -58,6 +60,7 @@ class ListingTableControl extends Control
         ItemFacade $itemFacade,
         User $user
     ) {
+        $listing->checkEntityState();
         $this->listing = $listing;
 
         $this->itemsTableControlFactory = $itemsTableControlFactory;
@@ -68,7 +71,7 @@ class ListingTableControl extends Control
 
     protected function createComponentItemsTable()
     {
-        $comp = $this->itemsTableControlFactory->create($this->listing->period);
+        $comp = $this->itemsTableControlFactory->create($this->listing);
         $comp->showActions(
             __DIR__ . '/templates/actions.latte',
             ['listingID' => $this->listing->listingID]
@@ -115,10 +118,14 @@ class ListingTableControl extends Control
                 $this->listing = $this->listingFacade
                                       ->getEntireListingByID($this->listing->listingID);
 
-                $listingItem = new ListingItem(); // empty item for decorator
-                $listingItem->setDay($day);
+                $item = new FillingItem(
+                    DateTime::createFromFormat(
+                        'd.m.Y',
+                        $day.'.'.$this->listing->month.'.'.$this->listing->year
+                        )
+                );
 
-                $this->itemsCollection = [$listingItem];
+                $this->itemsCollection = [$item];
 
                 $this['itemsTable']->redrawControl();
             } else {

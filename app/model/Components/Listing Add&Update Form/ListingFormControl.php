@@ -55,9 +55,6 @@ class ListingFormControl extends Control
         }
 
         $this->listing = $listing;
-        /*if ($this->listing === null) {
-            $this->listing = new Listing();
-        }*/
 
         $this->listingDescriptionFactory = $listingDescriptionFactory;
         $this->listingFormFactory = $listingFormFactory;
@@ -82,7 +79,7 @@ class ListingFormControl extends Control
 
     protected function createComponentListingForm()
     {
-        $form = $this->listingFormFactory->create($this->listing);
+        $form = $this->listingFormFactory->create();
 
         if ($this->listing !== null) { // Edit
 
@@ -127,7 +124,7 @@ class ListingFormControl extends Control
     public function processForm(Form $form, $values)
     {
         if ($this->listing === null) {
-            $this->listing = Listing::loadState(
+            $this->listing = new Listing(
                 $values['year'],
                 $values['month'],
                 $this->user->id

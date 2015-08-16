@@ -26,7 +26,7 @@ class ListingItem extends BaseEntity
      * @param string|null $descOtherHours
      * @return ListingItem
      */
-    public static function loadState(
+    public function __construct(
         $day,
         Listing $listing,
         WorkedHours $workedHours,
@@ -34,15 +34,14 @@ class ListingItem extends BaseEntity
         $description = null,
         $descOtherHours = null
     ) {
-        $item = new self;
-        $item->setDay($day);
-        $item->setListing($listing);
-        $item->setLocality($locality);
-        $item->setDescription($description);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
-        $item->setTime($workedHours, $descOtherHours);
+        $this->setDay($day);
+        $this->setListing($listing);
+        $this->setLocality($locality);
+        $this->setDescription($description);
 
-        return $item;
+        $this->setWorkedTime($workedHours, $descOtherHours);
     }
 
     /**
@@ -59,7 +58,7 @@ class ListingItem extends BaseEntity
      * @param WorkedHours $workedHours
      * @throws OtherHoursZeroTimeException
      */
-    public function setTime(WorkedHours $workedHours, $descOtherHours = null)
+    public function setWorkedTime(WorkedHours $workedHours, $descOtherHours = null)
     {
         $this->setWorkedHours($workedHours);
         $this->setDescOtherHours($descOtherHours);
@@ -80,14 +79,6 @@ class ListingItem extends BaseEntity
         }
 
         $this->row->descOtherHours = $descOtherHours;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getListingID()
-    {
-        return $this->row->listingID;
     }
 
     /**

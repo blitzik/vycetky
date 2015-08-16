@@ -6,21 +6,31 @@ require '../../../bootstrap.php';
 
 $service = new \App\Model\Services\ItemService();
 
-$listing = \App\Model\Entities\Listing::loadState(2015, 1, 1);
+// ------
+
+$listing = new \App\Model\Entities\Listing(2015, 1, 1);
 
 $_er->makeAlive($listing, 1);
 
-$locality = new \App\Model\Entities\Locality();
+// ------
+
+$locality = new \App\Model\Entities\Locality('Praha');
 
 $_er->makeAlive($locality, 1);
 
-$workedHours = new \App\Model\Entities\WorkedHours();
+// ------
+
+$workedHours = new \App\Model\Entities\WorkedHours(
+    new InvoiceTime('06:00'),
+    new InvoiceTime('16:00'),
+    new InvoiceTime('01:00')
+);
 
 $_er->makeAlive($workedHours, 1);
 
 $listingItems = [];
 for ($i = 1; $i <= 2; $i++) {
-    $item = \App\Model\Entities\ListingItem::loadState(
+    $item = new \App\Model\Entities\ListingItem(
         $i, $listing, $workedHours, $locality
     );
 
@@ -53,17 +63,27 @@ foreach ($newItems as $item) {
 
 Assert::exception(function () use ($service, $listingItems) {
 
-    array_unshift($listingItems, new \App\Model\Entities\Locality());
+    array_unshift($listingItems, new \App\Model\Entities\Locality('Brno'));
 
     $service->createItemsCopies($listingItems);
 
 }, 'Exceptions\Logic\InvalidArgumentException',
    'Invalid set of ListingItems given.');
 
-Assert::exception(function () use ($service, $listingItems) {
-
+Assert::exception(function () use (
+    $service,
+    $listingItems,
+    $listing,
+    $locality,
+    $workedHours
+) {
     // detached entity
-    array_unshift($listingItems, new \App\Model\Entities\ListingItem());
+    array_unshift(
+        $listingItems,
+        new \App\Model\Entities\ListingItem(
+            10, $listing, $workedHours, $locality
+        )
+    );
 
     $service->createItemsCopies($listingItems);
 

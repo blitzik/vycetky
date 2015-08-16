@@ -12,7 +12,7 @@ use DateTime;
  * @property string $password
  * @property string $email
  * @property string|null $name
- * @property string $role
+ * @property string $role = 'employee'
  * @property-read string $ip
  * @property DateTime $lastLogin
  * @property string $lastIP
@@ -22,16 +22,6 @@ use DateTime;
 class User extends BaseEntity
 {
     /**
-     * Allows initialize properties' default values
-     */
-    protected function initDefaults()
-    {
-        parent::initDefaults();
-
-        $this->row->role = 'employee';
-    }
-
-    /**
      * @param string $username
      * @param string $password
      * @param string $email
@@ -40,7 +30,7 @@ class User extends BaseEntity
      * @param string|null $name
      * @return User
      */
-    public static function loadState(
+    public function __construct(
         $username,
         $password,
         $email,
@@ -48,18 +38,17 @@ class User extends BaseEntity
         $role = 'employee',
         $name = null
     ) {
-        $user = new User();
-        $user->setUsername($username);
-        $user->setPassword($password);
-        $user->setEmail($email);
-        $user->setIp($ip);
-        $user->setRole($role);
-        $user->setName($name);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
-        $user->setLastIP($ip);
-        $user->setLastLogin(new DateTime());
+        $this->setUsername($username);
+        $this->setPassword($password);
+        $this->setEmail($email);
+        $this->setIp($ip);
+        $this->setRole($role);
+        $this->setName($name);
 
-        return $user;
+        $this->setLastIP($ip);
+        $this->setLastLogin(new DateTime());
     }
 
     /**
@@ -73,6 +62,7 @@ class User extends BaseEntity
     }
 
     /**
+     * Method also hashes password
      * @param string $password
      */
     public function setPassword($password)
@@ -119,7 +109,6 @@ class User extends BaseEntity
     private function validateIPAddress($ip)
     {
         $ip = filter_var($ip, FILTER_VALIDATE_IP, ['flags' => [FILTER_FLAG_IPV4, FILTER_FLAG_IPV6]]);
-        Validators::assert($ip, 'string:1..30');
 
         return $ip;
     }
@@ -153,10 +142,8 @@ class User extends BaseEntity
      */
     public function setToken($token)
     {
-        if (!is_null($token)) {
-            $token = trim($token);
-        }
-        Validators::assert($token, 'string:32');
+        Validators::assert($token, 'string:32|null');
+
         $this->row->token = $token;
     }
 

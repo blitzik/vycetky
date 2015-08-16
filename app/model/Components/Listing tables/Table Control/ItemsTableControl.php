@@ -6,7 +6,8 @@ use App\Model\Components\IListingDescriptionControlFactory;
 use App\Model\Entities\ListingItem;
 use Nette\Application\UI\Control;
 use App\Model\Facades\ItemFacade;
-use App\Model\Time\TimeUtils;
+use App\Model\Entities\Listing;
+use Tracy\Debugger;
 
 class ItemsTableControl extends Control
 {
@@ -21,9 +22,9 @@ class ItemsTableControl extends Control
     private $itemFacade;
 
     /**
-     * @var \DateTime
+     * @var Listing
      */
-    private $period;
+    private $listing;
 
     /**
      * @var ListingItem[]
@@ -44,12 +45,13 @@ class ItemsTableControl extends Control
     private $totalWorkedHours;
 
     public function __construct(
-        \DateTime $period,
+        Listing $listing,
         IListingDescriptionControlFactory $listingDescriptionControlFactory,
         ItemFacade $itemFacade
     ) {
+        $listing->checkEntityState();
+        $this->listing = $listing;
         $this->listingDescriptionControlFactory = $listingDescriptionControlFactory;
-        $this->period = $period;
         $this->itemFacade = $itemFacade;
     }
 
@@ -58,18 +60,16 @@ class ItemsTableControl extends Control
      */
     public function setListingItems(array $listingItems)
     {
-        $this->items = $this->itemFacade
-                            ->createListingItemDecoratorsCollection(
-                                $listingItems,
-                                $this->period->format('Y'),
-                                $this->period->format('n')
-                            );
+        /*$this->items = $this->itemFacade
+                            ->createListingItemDecoratorsCollection($listingItems);*/
+
+        $this->items = $listingItems;
     }
 
     protected function createComponentDescription()
     {
         $comp = $this->listingDescriptionControlFactory->create(
-            $this->period,
+            $this->listing->period,
             $this->tableCaptionDescription
         );
 
@@ -116,10 +116,11 @@ class ItemsTableControl extends Control
 
         if (!$this->presenter->isAjax()) {
             $this->items = $this->itemFacade
-                                ->generateListingItemDecoratorsForEntireTable(
-                                    $this->items,
-                                    $this->period
-                                );
+                                ->generateEntireTable($this->listing);
+        } else {
+            $this->items = $this->itemFacade->createListingItemDecoratorsCollection(
+                $this->items
+            );
         }
 
         $template->itemsCollection = $this->items;
@@ -131,10 +132,9 @@ class ItemsTableControl extends Control
         $template->showCheckBoxes = $this->showCheckBoxes;
         $template->showActions = $this->showActions;
         $template->parameters = $this->parameters;
-        $template->numberOfDaysInMonth = TimeUtils::getNumberOfDaysInMonth(
-            $this->period->format('Y'),
-            $this->period->format('n')
-        );
+        $template->listing = $this->listing;
+
+        $template->numberOfDaysInMonth = $this->listing->getNumberOfDaysInMonth();
 
         $template->render();
     }

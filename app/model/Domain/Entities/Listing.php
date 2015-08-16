@@ -37,20 +37,19 @@ class Listing extends BaseEntity
      * @param string|null $hourlyWage
      * @return Listing
      */
-    public static function loadState(
+    public function __construct(
         $year,
         $month,
         $user,
         $description = null,
         $hourlyWage = null
     ) {
-        $listing = new self;
-        $listing->setListingPeriod($year, $month);
-        $listing->setUser($user);
-        $listing->setDescription($description);
-        $listing->setHourlyWage($hourlyWage);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
-        return $listing;
+        $this->setListingPeriod($year, $month);
+        $this->setUser($user);
+        $this->setDescription($description);
+        $this->setHourlyWage($hourlyWage);
     }
 
     /**

@@ -14,12 +14,11 @@ class Locality extends BaseEntity
      * @param string $localityName
      * @return Locality
      */
-    public static function loadState($localityName)
+    public function __construct($localityName)
     {
-        $locality = new self;
-        $locality->setName($localityName);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
-        return $locality;
+        $this->setName($localityName);
     }
 
     /**

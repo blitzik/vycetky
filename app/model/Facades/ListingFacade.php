@@ -2,6 +2,7 @@
 
 namespace App\Model\Facades;
 
+use App\Model\Domain\FillingItem;
 use Exceptions\Runtime\NoCollisionListingItemSelectedException;
 use Exceptions\Runtime\NegativeResultOfTimeCalcException;
 use Exceptions\Runtime\ListingItemNotFoundException;
@@ -288,7 +289,7 @@ class ListingFacade extends BaseFacade
                     if (isset($item->descOtherHours) and $whInSecs > 0) {
                             $descOtherHours = $item->descOtherHours;
                     }
-                    $item->setTime($workedHours, $descOtherHours);
+                    $item->setWorkedTime($workedHours, $descOtherHours);
                 }
             }
 
@@ -422,27 +423,29 @@ class ListingFacade extends BaseFacade
 
         $days = $baseListing->getNumberOfDaysInMonth();
 
+
         $result = array();
         for ($day = 1; $day <= $days; $day++) {
             if (!array_key_exists($day, $items)) {
-                $listingItem = new ListingItem();
-                $listingItem->day = $day;
-                $result[$day][] = new ListingItemDecorator(
-                    $listingItem,
-                    $baseListing->year,
-                    $baseListing->month
+                $result[$day][] = new FillingItem(
+                    new \DateTime(
+                        $baseListing->year.'-'.$baseListing->month.'-'.$day
+                    )
                 );
             } else {
-                foreach ($items[$day] as $item) {
-                    $result[$day][] = new ListingItemDecorator(
-                        $item,
-                        $baseListing->year,
-                        $baseListing->month
-                    );
+                foreach ($items[$day] as $key => $item) {
+                    $itemDec = new ListingItemDecorator($item);
+                    $itemDec->setAsItemFromBaseListing(true);
+
+                    if ($key != 0) {
+                        $itemDec->setAsItemFromBaseListing(false);
+                    }
+
+                    $result[$day][] = $itemDec;
                 }
             }
         }
-        
+
         return $result;
     }
 
@@ -481,7 +484,7 @@ class ListingFacade extends BaseFacade
         try {
             $this->transaction->begin();
 
-            $newListing = Listing::loadState(
+            $newListing = new Listing(
                 $baseListing->year,
                 $baseListing->month,
                 $userID

@@ -42,7 +42,6 @@ class MessagesFacadeTest extends BaseFacadeTest
 
         Assert::same(1, $numberOfMessages);
 
-
     }
 
 }

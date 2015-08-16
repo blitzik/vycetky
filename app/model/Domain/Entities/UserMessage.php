@@ -26,15 +26,14 @@ class UserMessage extends BaseEntity
      * @param $recipient
      * @return UserMessage
      */
-    public static function loadState(
+    public function __construct(
         Message $message,
         $recipient
     ) {
-        $um = new self;
-        $um->setMessage($message);
-        $um->setRecipient($recipient);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
-        return $um;
+        $this->setMessage($message);
+        $this->setRecipient($recipient);
     }
 
     /**
