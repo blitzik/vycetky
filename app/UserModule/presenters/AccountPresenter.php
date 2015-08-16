@@ -2,6 +2,7 @@
 
 namespace App\UserModule\Presenters;
 
+use App\Model\Entities\User;
 use App\Model\Facades\UserManager;
 use Nette\Application\UI\Form;
 use Nette;
@@ -156,10 +157,10 @@ class AccountPresenter extends BasePresenter
             return;
         }
 
-        $values['ip']        = $this->getHttpRequest()->getRemoteAddress();
-        $values['role']      = 'employee';
+        $values['ip']   = $this->getHttpRequest()->getRemoteAddress();
+        $values['role'] = 'employee';
 
-        $user = \App\Model\Entities\User::loadState(
+        $user = new User(
             $values['username'],
             $values['password'],
             $values['email'],

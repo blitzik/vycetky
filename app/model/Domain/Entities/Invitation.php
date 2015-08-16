@@ -20,17 +20,16 @@ class Invitation extends BaseEntity
      * @param DateTime $validity
      * @return Invitation
      */
-    public static function loadState(
+    public function __construct(
         $email,
         $regHash,
         DateTime $validity
     ) {
-        $invitation = new self;
-        $invitation->setEmail($email);
-        $invitation->setRegHash($regHash);
-        $invitation->setValidity($validity);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
-        return $invitation;
+        $this->setEmail($email);
+        $this->setRegHash($regHash);
+        $this->setValidity($validity);
     }
 
     /**

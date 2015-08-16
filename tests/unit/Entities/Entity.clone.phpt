@@ -4,7 +4,7 @@ require '../../bootstrap.php';
 
 use Tester\Assert;
 
-$wh = \App\Model\Entities\WorkedHours::loadState(
+$wh = new \App\Model\Entities\WorkedHours(
     new InvoiceTime('06:00'),
     new InvoiceTime('16:00'),
     new InvoiceTime('01:00')

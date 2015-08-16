@@ -27,7 +27,7 @@ class SharedListingNotification extends Object
     ) {
         $period = TimeUtils::getMonthName($listing->month) . ' ' . $listing->year;
 
-        $m = Message::loadState(
+        $m = new Message(
             $this->constructSubject($senderName, $period),
             $this->constructMessage(
                 $senderName,

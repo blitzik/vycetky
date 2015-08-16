@@ -19,23 +19,13 @@ class WorkedHours extends BaseEntity
 {
     use TInvoiceTimeConversion;
 
-    protected function initDefaults()
-    {
-        parent::initDefaults();
-
-        $this->row->otherHours = '00:00:00';
-    }
-
     /**
      * @param \DateTime|InvoiceTime|int|string|null $workStart
      * @param \DateTime|InvoiceTime|int|string|null $workEnd
      * @param \DateTime|InvoiceTime|int|string|null $lunch
-     * @param \DateTime|InvoiceTime|int|string|null $otherHours
-     * @throws ShiftEndBeforeStartException
-     * @throws NegativeResultOfTimeCalcException
-     * @return WorkedHours
+     * @param \DateTime|InvoiceTime|int|string|null null $otherHours
      */
-    public static function loadState(
+    public function __construct(
         $workStart,
         $workEnd,
         $lunch,
@@ -52,45 +42,12 @@ class WorkedHours extends BaseEntity
             );
         }
 
-        $wh = new WorkedHours();
-        $wh->setWorkStart($workStart);
-        $wh->setWorkEnd($workEnd);
-        $wh->setLunch($lunch);
-        $wh->setOtherHours($otherHours);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
-        return $wh;
-    }
-
-    /**
-     * @param \DateTime|InvoiceTime|int|string|null $workStart
-     */
-    private function setWorkStart($workStart)
-    {
-        $this->row->workStart = InvoiceTime::processTime($workStart);
-    }
-
-    /**
-     * @param \DateTime|InvoiceTime|int|string|null $workEnd
-     */
-    private function setWorkEnd($workEnd)
-    {
-        $this->row->workEnd = InvoiceTime::processTime($workEnd);
-    }
-
-    /**
-     * @param \DateTime|InvoiceTime|int|string|null $lunch
-     */
-    private function setLunch($lunch)
-    {
-        $this->row->lunch = InvoiceTime::processTime($lunch);
-    }
-
-    /**
-     * @param \DateTime|InvoiceTime|int|string|null $otherHours
-     */
-    private function setOtherHours($otherHours)
-    {
-        $this->row->otherHours = InvoiceTime::processTime($otherHours);
+        $this->row->workStart = $workStart->getTime();
+        $this->row->workEnd = $workEnd->getTime();
+        $this->row->lunch = $lunch->getTime();
+        $this->row->otherHours = $otherHours->getTime();
     }
 
     private function caclHours()

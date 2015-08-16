@@ -30,7 +30,7 @@ class ItemFacadeTest extends BaseFacadeTest
             new InvoiceTime('01:00')
         );
 
-        $listingItem = \App\Model\Entities\ListingItem::loadState(
+        $listingItem = new \App\Model\Entities\ListingItem(
             1, $listing, $workedHours, $locality
         );
 
@@ -53,7 +53,7 @@ class ItemFacadeTest extends BaseFacadeTest
 
         Assert::exception(
             function () use ($listing, $workedHours, $locality) {
-                $item = \App\Model\Entities\ListingItem::loadState(
+                $item = new \App\Model\Entities\ListingItem(
                     1, $listing, $workedHours, $locality
                 );
 

@@ -154,19 +154,19 @@ class ItemPresenter extends SecurityPresenter
     public function processSaveItem(Form $form, $values)
     {
         try {
-            $workedHours = Entities\WorkedHours::loadState(
-                new \InvoiceTime($values['workStart']),
-                new \InvoiceTime($values['workEnd']),
-                new \InvoiceTime($values['lunch']),
-                new \InvoiceTime($values['otherHours'])
+            $workedHours = new Entities\WorkedHours(
+                $values['workStart'],
+                $values['workEnd'],
+                $values['lunch'],
+                $values['otherHours']
             );
             $this->itemFacade->setupWorkedHoursEntity($workedHours);
 
-            $locality = Entities\Locality::loadState($values['locality']);
+            $locality = new Entities\Locality($values['locality']);
             $this->itemFacade->setupLocalityEntity($locality);
 
             if (is_null($this->listingItem)) {
-                $this->listingItem = Entities\ListingItem::loadState(
+                $this->listingItem = new Entities\ListingItem(
                     $this->date->format('j'),
                     $this->listing,
                     $workedHours,
@@ -175,7 +175,7 @@ class ItemPresenter extends SecurityPresenter
                     $values['descOtherHours']
                 );
             } else {
-                $this->listingItem->setTime($workedHours, $values['descOtherHours']);
+                $this->listingItem->setWorkedTime($workedHours, $values['descOtherHours']);
                 $this->listingItem->setLocality($locality);
             }
 

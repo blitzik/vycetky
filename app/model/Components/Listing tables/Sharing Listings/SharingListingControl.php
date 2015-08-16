@@ -87,7 +87,7 @@ class SharingListingControl extends Control
 
     protected function createComponentItemsTable()
     {
-        $comp = $this->itemsTableControlFactory->create($this->listing->period);
+        $comp = $this->itemsTableControlFactory->create($this->listing);
         $comp->showTableCaption(
             $this->listing->description,
             $this->listing->workedDays,

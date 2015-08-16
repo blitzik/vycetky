@@ -6,30 +6,37 @@ require '../../../bootstrap.php';
 
 $service = new \App\Model\Services\ItemService();
 
-$locality = new \App\Model\Entities\Locality();
+$listing = new \App\Model\Entities\Listing(2015, 5, 1);
+$_er->makeAlive($listing, 1);
+
+$listing2 = new \App\Model\Entities\Listing(2015, 5, 1);
+$_er->makeAlive($listing2, 2);
+
+
+$locality = new \App\Model\Entities\Locality('Praha');
 $_er->makeAlive($locality, 1);
 
-$workedHours = new \App\Model\Entities\WorkedHours();
+$workedHours = new \App\Model\Entities\WorkedHours(
+    new InvoiceTime('06:00'),
+    new InvoiceTime('16:00'),
+    new InvoiceTime('01:00')
+);
 $_er->makeAlive($workedHours, 1);
 
 $baseItems = [];
 $items = [];
 for ($i = 2; $i <= 4; $i += 2) { // Items days 1 and 3
 
-    $item = new \App\Model\Entities\ListingItem();
-    $item->setDay($i - 1);
-    $item->locality = $locality;
-    $item->setTime($workedHours);
-
+    $item = new \App\Model\Entities\ListingItem(
+        ($i - 1), $listing, $workedHours, $locality
+    );
     $_er->makeAlive($item, $i - 1);
 
     $baseItems[] = $item;
 
-    $item2 = new \App\Model\Entities\ListingItem();
-    $item2->setDay($i - 1);
-    $item2->locality = $locality;
-    $item2->setTime($workedHours);
-
+    $item2 = new \App\Model\Entities\ListingItem(
+        ($i - 1), $listing, $workedHours, $locality
+    );
     $_er->makeAlive($item2, $i);
 
     $items[] = $item2;
@@ -40,35 +47,36 @@ for ($i = 2; $i <= 4; $i += 2) { // Items days 1 and 3
 
 // For 6th day, there is Listing Item with different worked hours
 // but same Locality.
-$loc2 = new \App\Model\Entities\Locality();
+$loc2 = new \App\Model\Entities\Locality('Brno');
 $_er->makeAlive($loc2, 2);
 
 // This entity is just for base items, it does not have equal day entity in $items
-$li = new \App\Model\Entities\ListingItem();
-$li->setDay(6);
-$li->locality = $loc2;
-$li->setTime($workedHours);
+$li = new \App\Model\Entities\ListingItem(
+    6, $listing2, $workedHours, $loc2
+);
 $_er->makeAlive($li, 20);
 
 $baseItems[] = $li;
 
 
 // and last 2 entities for same day but with different localities and worked hours
-$li3 = new \App\Model\Entities\ListingItem();
-$li3->setDay(10);
-$li3->locality = $locality;
-$li3->setTime($workedHours);
+$li3 = new \App\Model\Entities\ListingItem(
+    10, $listing2, $workedHours, $locality
+);
 $_er->makeAlive($li3, 30);
 
 $baseItems[] = $li3;
 
-$wh = new \App\Model\Entities\WorkedHours();
+$wh = new \App\Model\Entities\WorkedHours(
+    new InvoiceTime('06:00'),
+    new InvoiceTime('15:00'),
+    new InvoiceTime('01:00')
+);
 $_er->makeAlive($wh, 5);
 
-$li4 = new \App\Model\Entities\ListingItem();
-$li4->setDay(10);
-$li4->locality = $loc2;
-$li4->setTime($wh);
+$li4 = new \App\Model\Entities\ListingItem(
+    10, $listing2, $wh, $loc2
+);
 $_er->makeAlive($li4, 40);
 
 $items[] = $li4;

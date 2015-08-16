@@ -77,7 +77,7 @@ $connection = new \LeanMapper\Connection(
 
 $mapper = new \App\Model\Mapper\StandardMapper();
 
-$entityFactory = new \LeanMapper\DefaultEntityFactory();
+$entityFactory = new EntityFactory($container);
 
 $_er = new EntityResuscitator($mapper, $connection, $entityFactory);
 

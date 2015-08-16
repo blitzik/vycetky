@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Class EntityFactory
- * @deprecated
- */
 class EntityFactory extends \Nette\Object implements \LeanMapper\IEntityFactory
 {
     /**
@@ -25,9 +21,13 @@ class EntityFactory extends \Nette\Object implements \LeanMapper\IEntityFactory
      */
     public function createEntity($entityClass, $arg = null)
     {
-        $entity = new $entityClass();/*$this->container->createInstance($entityClass);*/
+        $rc = new ReflectionClass($entityClass);
+        $m = $rc->getMethod('loadState');
+        $m->setAccessible(true);
+        $entity = $rc->newInstanceWithoutConstructor();
+        $m->invoke($entity, $arg);
+        //$this->container->createInstance($entityClass);
         //$this->container->callInjects($entity);
-        $entity->loadState($arg);
 
         return $entity;
     }

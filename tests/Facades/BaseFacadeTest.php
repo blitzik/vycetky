@@ -110,10 +110,9 @@ abstract class BaseFacadeTest extends \Tester\TestCase
             }
         }
 
-        $workedHours = \App\Model\Entities\WorkedHours::loadState(
+        $workedHours = new \App\Model\Entities\WorkedHours(
             $workStart, $workEnd, $lunch, $otherHours
         );
-
         $this->makeEntityAlive($workedHours, $id);
 
         return $workedHours;
@@ -141,9 +140,7 @@ abstract class BaseFacadeTest extends \Tester\TestCase
             }
         }
 
-        $locality = \App\Model\Entities\Locality::loadState(
-            $localityName
-        );
+        $locality = new \App\Model\Entities\Locality($localityName);
 
         $this->makeEntityAlive($locality, $id);
 
@@ -167,11 +164,9 @@ abstract class BaseFacadeTest extends \Tester\TestCase
         $this->connection->query('INSERT INTO [listing]', $arr);
         $id = $this->connection->getInsertId();
 
-        $listing = \App\Model\Entities\Listing::loadState(
+        $listing = new \App\Model\Entities\Listing(
             $year, $month, $user, $listingDescription, $hourlyWage
         );
-
-        $listing->loadState($year, $month, $user);
 
         $this->makeEntityAlive($listing, $id);
 
@@ -264,7 +259,7 @@ abstract class BaseFacadeTest extends \Tester\TestCase
         $this->connection->insert('user', $values)->execute();
         $id = $this->connection->getInsertId();
 
-        $user = \App\Model\Entities\User::loadState(
+        $user = new \App\Model\Entities\User(
             $values['username'],
             $values['password'],
             $values['email'],

@@ -78,7 +78,7 @@ class MassItemsChangeControl extends Control
 
     protected function createComponentItemsTable()
     {
-        $comp = $this->itemsTableControlFactory->create($this->listing->period);
+        $comp = $this->itemsTableControlFactory->create($this->listing);
         $comp->showCheckBoxes();
 
         $comp->showTableCaption(
@@ -126,11 +126,11 @@ class MassItemsChangeControl extends Control
         }
 
         try {
-            $workedHours = WorkedHours::loadState(
-                new \InvoiceTime($values['workStart']),
-                new \InvoiceTime($values['workEnd']),
-                new \InvoiceTime($values['lunch']),
-                new \InvoiceTime($values['otherHours'])
+            $workedHours = new WorkedHours(
+                $values['workStart'],
+                $values['workEnd'],
+                $values['lunch'],
+                $values['otherHours']
             );
 
             $data = $this->listingFacade

@@ -53,8 +53,8 @@ services:
 
 	itemsTableControlFactory:
 		implement: App\Model\Components\ItemsTable\IItemsTableControlFactory
-		parameters: [DateTime period]
-		arguments: [%period%]
+		parameters: [App\Model\Entities\Listing listing]
+		arguments: [%listing%]
 
 	listingTableControlFactory:
 		implement: App\Model\Components\ListingTable\IListingTableControlFactory
@@ -88,7 +88,7 @@ services:
 
 	# LeanMapper
 	standardMapper: App\Model\Mapper\StandardMapper
-	entityFactory: LeanMapper\DefaultEntityFactory
+	entityFactory: EntityFactory
 
 	# Repositories
 	userMessageRepository: App\Model\Repositories\UserMessageRepository

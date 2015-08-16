@@ -3,7 +3,6 @@
 namespace App\FrontModule\Presenters;
 
 use Exceptions\Runtime\InvitationAlreadyExistsException;
-use App\Model\Components\IDatabaseBackupControlFactory;
 use App\Model\Notifications\EmailNotifier;
 use Nette\Application\UI\ITemplate;
 use App\Model\Entities\Invitation;

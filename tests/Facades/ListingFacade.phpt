@@ -54,7 +54,9 @@ class ListingFacadeTest extends BaseFacadeTest
 
         //////////
 
-        $listing = new \App\Model\Entities\Listing(); // detached instance
+        $listing = new \App\Model\Entities\Listing(
+            2015, 5, self::TEST_USER_ID
+        ); // detached instance
 
         Assert::exception(function () use ($listing) {
 
@@ -67,8 +69,6 @@ class ListingFacadeTest extends BaseFacadeTest
     public function testChangeItemsInListing()
     {
         $listing = $this->generateListing();
-
-        $itemData = $this->defaultWorkedHours + ['descOtherHours' => 'test'];
 
         $this->generateItems(
             $listing,
@@ -118,7 +118,7 @@ class ListingFacadeTest extends BaseFacadeTest
 
         Assert::exception(
             function () use ($workedHours) {
-                $l = new \App\Model\Entities\Listing();
+                $l = new \App\Model\Entities\Listing(2015, 5, self::TEST_USER_ID);
 
                 $this->listingFacade->changeItemsInListing(
                     $l,
@@ -145,7 +145,7 @@ class ListingFacadeTest extends BaseFacadeTest
         /** @var \App\Model\Facades\UserManager $userManager */
         $userManager = $this->container->getService('userManager');
 
-        $newUser = \App\Model\Entities\User::loadState(
+        $newUser = new \App\Model\Entities\User(
             'user', 'password', 'user@user.lc', '127.0.0.1'
         );
 
@@ -175,7 +175,7 @@ class ListingFacadeTest extends BaseFacadeTest
 
         Assert::exception(
             function () {
-                $l = new \App\Model\Entities\Listing();
+                $l = new \App\Model\Entities\Listing(2015, 5, self::TEST_USER_ID);
 
                 $this->listingFacade->shareListing(
                     $l,
@@ -234,16 +234,22 @@ class ListingFacadeTest extends BaseFacadeTest
         Assert::count(2, $result[2]); // 2nd day
         Assert::count(1, $result[3]); // 3rd day
 
+        // existing Items become Decorators
+        // and the days that did not fit to any Item become FillingItem
         foreach ($result as $day => $items) {
             foreach ($items as $item) {
-                Assert::type('\App\Model\Domain\ListingItemDecorator', $item);
+                if ($day >= 1 and $day <= 3 ) {
+                    Assert::type('\App\Model\Domain\ListingItemDecorator', $item);
+                } else {
+                    Assert::type('\App\Model\Domain\FillingItem', $item);
+                }
             }
         }
 
         Assert::exception(
             function () {
-                $l = new \App\Model\Entities\Listing();
-                $l2 = new \App\Model\Entities\Listing();
+                $l  = new \App\Model\Entities\Listing(2015, 5, self::TEST_USER_ID);
+                $l2 = new \App\Model\Entities\Listing(2015, 5, self::TEST_USER_ID);
 
                 $this->listingFacade->getMergedListingsItemsForEntireTable(
                     $l,
@@ -337,15 +343,15 @@ class ListingFacadeTest extends BaseFacadeTest
 
     public function testHaveListingsSamePeriod()
     {
-        $listing = \App\Model\Entities\Listing::loadState(2015, 5, 1);
+        $listing = new \App\Model\Entities\Listing(2015, 5, self::TEST_USER_ID);
 
-        $listing2 = \App\Model\Entities\Listing::loadState(2015, 5, 1);
+        $listing2 = new \App\Model\Entities\Listing(2015, 5, 1);
 
         $result = $this->listingFacade->haveListingsSamePeriod($listing, $listing2);
 
         Assert::true($result);
 
-        $listing3 =\App\Model\Entities\Listing::loadState(2015, 3, 1);
+        $listing3 = new \App\Model\Entities\Listing(2015, 3, 1);
 
         $result = $this->listingFacade->haveListingsSamePeriod($listing, $listing3);
 

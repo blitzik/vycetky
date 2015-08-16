@@ -2,12 +2,17 @@
 
 namespace App\Model\Entities;
 
-use Exceptions\Logic\InvalidArgumentException;
 use Exceptions\Runtime\DetachedEntityInstanceException;
+use Exceptions\Logic\InvalidArgumentException;
 use LeanMapper\Entity;
 
 abstract class BaseEntity extends Entity
 {
+    private function loadState($args = null)
+    {
+        parent::__construct($args);
+    }
+
     /**
      * @throws DetachedEntityInstanceException
      */

@@ -11,7 +11,7 @@ use DateTime;
  * @property-read \DateTime $sent
  * @property-read string $subject
  * @property-read string $message
- * @property-read bool $deleted
+ * @property-read bool $deleted = false
  * @property-read bool $isReceived m:temporary
  * @property-read bool $isRead m:temporary
  * @property-read User|null $author m:hasOne(author:user)
@@ -25,40 +25,29 @@ class Message extends BaseEntity
     const READ = 1;
 
     /**
-     * Allows initialize properties' default values
-     */
-    protected function initDefaults()
-    {
-        parent::initDefaults();
-
-        $this->row->deleted = 0;
-    }
-
-    /**
      * @param string $subject
      * @param string $message
      * @param string $author
      * @param \DateTime $sent If $sent is null, sent is set to current date
      * @return Message
      */
-    public static function loadState(
+    public function __construct(
         $subject,
         $message,
         $author,
         DateTime $sent = null
     ) {
-        $msg = new self;
-        $msg->setSubject($subject);
-        $msg->setMessage($message);
-        $msg->setAuthor($author);
+        $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
+
+        $this->setSubject($subject);
+        $this->setMessage($message);
+        $this->setAuthor($author);
 
         if (is_null($sent)) {
             $sent = new DateTime();
         }
 
-        $msg->setSent($sent);
-
-        return $msg;
+        $this->setSent($sent);
     }
 
     /**
@@ -109,6 +98,8 @@ class Message extends BaseEntity
 
     public function getRecipientsNames()
     {
+        $this->checkEntityState();
+
         $recipientsNames = [];
         foreach ($this->row->referencing('user_message', 'messageID') as $userMessage) {
             $user = $userMessage->referenced('user', 'recipient');
@@ -123,6 +114,7 @@ class Message extends BaseEntity
      */
     public function isReceived()
     {
+        $this->checkEntityState();
         return $this->row->isReceived == 1 ? true : false;
     }
 
@@ -131,6 +123,7 @@ class Message extends BaseEntity
      */
     public function isRead()
     {
+        $this->checkEntityState();
         return $this->row->isRead == 1 ? true : false;
     }
 

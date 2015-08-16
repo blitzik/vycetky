@@ -3,35 +3,67 @@
 namespace App\Model\Domain;
 
 use App\Model\Entities\ListingItem;
-use App\Model\Time\TimeManipulator;
 use App\Model\Time\TimeUtils;
-use Nette\Object;
+use Nette\Utils\Validators;
 
-class ListingItemDecorator extends Object
+class ListingItemDecorator extends FillingItem
 {
-
     /**
      * @var ListingItem
      */
     private $listingItem;
 
-    private $year;
-    private $month;
-
+    /**
+     * @var bool|null
+     */
+    private $isFromBaseListing = null;
 
     public function __construct(
-        ListingItem $listingItem,
-        $year,
-        $month
+        ListingItem $listingItem
     ) {
+        $listingItem->checkEntityState();
+
         $this->listingItem = $listingItem;
-        $this->year = $year;
-        $this->month = $month;
+
+        $year = $listingItem->listing->year;
+        $month = $listingItem->listing->month;
+
+        $this->date = TimeUtils::getDateTimeFromParameters(
+            $year,
+            $month,
+            $listingItem->day
+        );
     }
 
+    /**
+     * @return false
+     */
     public function isFilling()
     {
-        return ($this->listingItem->isDetached()) ? true : false;
+        return false;
+    }
+
+    /**
+     * @ bool
+     */
+    public function setAsItemFromBaseListing($bool)
+    {
+        Validators::assert($bool, 'bool');
+
+        $this->isFromBaseListing = $bool;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function isItemFromBaseListing()
+    {
+        return $this->isFromBaseListing;
+    }
+
+    public function getListingID()
+    {
+        return $this->listingItem->listing->listingID;
     }
 
     public function getListingItemID()
@@ -46,26 +78,7 @@ class ListingItemDecorator extends Object
 
     public function getDay()
     {
-        return TimeUtils::getDateTimeFromParameters(
-            $this->year,
-            $this->month,
-            $this->listingItem->day
-        );
-    }
-
-    public function isWeekDay()
-    {
-        $d = date_format($this->getDay(), 'w');
-
-        return ($d > 0 && $d < 6) ? true : false;
-    }
-
-    public function isCurrentDay()
-    {
-        if ($this->getDay()->format('Y-m-d') == (new \DateTime('now'))->format('Y-m-d'))
-            return true;
-
-        return false;
+        return $this->date;
     }
 
     public function getWorkStart()
@@ -103,11 +116,6 @@ class ListingItemDecorator extends Object
         return $this->listingItem->description;
     }
 
-    public function getListingID()
-    {
-        return $this->listingItem->getListingID();
-    }
-
     public function getListingItem()
     {
         return $this->listingItem;
@@ -118,12 +126,9 @@ class ListingItemDecorator extends Object
      */
     public function areWorkedHoursWithoutLunchZero()
     {
-        $workedHours = TimeManipulator::subTimes(
-                           [$this->listingItem->workedHours->workStart,
-                            $this->listingItem->workedHours->workEnd]
-                       );
+        $workedHours = $this->getWorkEnd()->subTime($this->getWorkStart());
 
-        return ($workedHours === '00:00:00') ? true : false;
+        return ($workedHours->compare('00:00:00') === 0) ? true : false;
     }
 
 }

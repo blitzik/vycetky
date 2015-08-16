@@ -482,10 +482,7 @@ class ListingPresenter extends SecurityPresenter
                          ->setFile(__DIR__ . '/../templates/Listing/pdf.latte');
 
         $template->itemsCollection = $this->itemFacade
-                                          ->generateEntireTable(
-                                              $this->listing->listingItems,
-                                              $this->listing->period
-                                          );
+                                          ->generateEntireTable($this->listing);
 
         $template->listing = $this->listing;
         $template->username = $values['name'] == null ?: $values['name'];

@@ -3,7 +3,6 @@
 namespace App\Model\Facades;
 
 use App\Model\Entities\Invitation;
-use Nette\Security\Passwords;
 use App\Model\Entities\User;
 use App\Model\Repositories;
 use \Exceptions\Runtime;
@@ -81,33 +80,6 @@ class UserManager extends Nette\Object
     public function removeInvitation(Invitation $invitation)
     {
         $this->invitationRepository->delete($invitation);
-    }
-
-    /**
-     *
-     * @param User $user
-     * @param string $password
-     * @return void
-     * @throws \DibiException
-     */
-    public function changePassword(User $user, $password)
-    {
-        $user->password = Passwords::hash($password);
-
-        try {
-            $this->transaction->begin();
-
-                $this->resetToken($user);
-                $this->userRepository->persist($user);
-
-            $this->transaction->commit();
-
-        } catch (\DibiException $e) {
-
-            $this->transaction->rollback();
-            Debugger::log($e, Debugger::ERROR);
-            throw $e;
-        }
     }
 
     /**
@@ -196,7 +168,7 @@ class UserManager extends Nette\Object
         $regHash = \Nette\Utils\Random::generate(32);
         $currentDate = new \DateTime;
 
-        $invitation = Invitation::loadState(
+        $invitation = new Invitation(
             $email,
             $regHash,
             $currentDate->modify('+1 week')

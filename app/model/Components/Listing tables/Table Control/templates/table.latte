@@ -33,7 +33,6 @@
             {include #items-table-actionsLabel}
         {/if}
     </tr>
-
     {foreach $itemsCollection as $day => $item}
         <tr n:class="$item->isCurrentDay() ? currentDay, $item->isWeekDay() ? weekDay"
             n:snippet="itemDay-$day">
