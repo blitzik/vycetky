@@ -3,6 +3,7 @@
 namespace App\Model\Repositories;
 
 use Exceptions\Runtime\MessageNotFoundException;
+use Exceptions\Logic\InvalidArgumentException;
 use App\Model\Entities\Message;
 
 class MessageRepository extends BaseRepository
@@ -139,6 +140,10 @@ class MessageRepository extends BaseRepository
                      'AND author = ?', $authorID);
     }
 
+    /**
+     * @param array $messagesIDs
+     * @param $authorID
+     */
     public function removeAuthorMessages(array $messagesIDs, $authorID)
     {
         $this->connection
@@ -148,6 +153,10 @@ class MessageRepository extends BaseRepository
                      'AND author = ?', $authorID);
     }
 
+    /**
+     * @param array $messages
+     * @throws \DibiException
+     */
     public function saveMessages(array $messages)
     {
         $values = [];

@@ -60,7 +60,7 @@ class LocalityFacade extends BaseFacade
     {
         Validators::assert($localityName, 'string|null');
         Validators::assert($limit, 'numericint');
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         return $localities = $this->localityRepository
                                   ->findSimilarByName(
@@ -84,7 +84,7 @@ class LocalityFacade extends BaseFacade
      */
     public function findAllUserLocalities($user)
     {
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         return $this->localityRepository->findAllUserLocalities($userID);
     }

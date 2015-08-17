@@ -2,10 +2,10 @@
 
 namespace App\UserModule\Presenters;
 
-use App\Model\Entities\User;
 use App\Model\Facades\UserManager;
 use Nette\Application\UI\Form;
-use Nette;
+use App\Model\Entities\User;
+use Nette\Utils\Validators;
 
 class AccountPresenter extends BasePresenter
 {
@@ -92,12 +92,17 @@ class AccountPresenter extends BasePresenter
      * ------------------------
      */
 
-    public function actionRegistration($token)
+    public function actionRegistration($email, $token)
     {
-        try {
-                $this->invitation = $this->userManager->checkToken($token);
+        if (!Validators::is($email, 'email')) {
+            $this->flashMessage('E-mailová adresa nemá platný formát.', 'warning');
+            $this->redirect('Account:default');
+        }
 
-        } catch (\Exceptions\Runtime\TokenValidityException $t) {
+        try {
+                $this->invitation = $this->userManager->checkInvitation($email, $token);
+
+        } catch (\Exceptions\Runtime\InvitationValidityException $t) {
             $this->flashMessage('Registrovat se může pouze uživatel s platnou pozvánkou.', 'error');
             $this->redirect('Account:default');
         }

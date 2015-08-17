@@ -99,7 +99,7 @@ class MessagesFacade extends BaseFacade
     ) {
         Validators::assert($offset, 'numericint');
         Validators::assert($length, 'numericint');
-        $userID = $this->getUserID($user);;
+        $userID = $this->getIdOfSignedInUserOnNull($user);;
 
         return $this->messageRepository
                     ->findReceivedMessages(
@@ -117,7 +117,7 @@ class MessagesFacade extends BaseFacade
      */
     public function getNumberOfReceivedMessages($messageType, $user = null)
     {
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         return $this->messageRepository
                     ->getNumberOfReceivedMessages($userID, $messageType);
@@ -131,7 +131,7 @@ class MessagesFacade extends BaseFacade
      */
     public function findSentMessages($offset, $length, $user = null)
     {
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         return $this->messageRepository
                     ->findSentMessages($userID, $offset, $length);
@@ -143,7 +143,7 @@ class MessagesFacade extends BaseFacade
      */
     public function getNumberOfSentMessages($user = null)
     {
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         return $this->messageRepository->getNumberOfSentMessages($userID);
     }
@@ -153,6 +153,7 @@ class MessagesFacade extends BaseFacade
      * @param string $text
      * @param \App\Model\Entities\User|int $author
      * @param array $recipients IDs or App\Entities\User instances
+     * @return Message
      * @throws MessageLengthException
      * @throws \DibiException
      */
@@ -176,6 +177,8 @@ class MessagesFacade extends BaseFacade
 
             $this->transaction->commit();
 
+            return $message;
+
         } catch (\DibiException $e) {
 
             $this->transaction->rollback();
@@ -190,36 +193,61 @@ class MessagesFacade extends BaseFacade
     }
 
     /**
-     * @param array $messages Key => recipientID, Value = Message entity
+     * @param array $messages Key => recipientID, Value = Message entity or array of messages
      * @throws InvalidArgumentException
      * @throws \DibiException
+     * @return array
      */
     public function sendMessages(array $messages)
     {
-        foreach ($messages as $recipientID => $message) {
-            if (!is_int($recipientID) or !$message instanceof Message or
-                !$message->isDetached()) {
-                throw new InvalidArgumentException(
-                    'Wrong structure of argument'
-                );
+        $ex = new InvalidArgumentException(
+            'Only non-persisted instances of App\Model\Entities\Message can pas.'
+        );
+
+        $msgs = [];
+        foreach ($messages as $recipientID => $recipientMessages) {
+            Validators::assert($recipientID, 'numericint');
+
+            if (is_array($recipientMessages)) {
+                foreach ($recipientMessages as $message) {
+                    if (!($message instanceof Message and $message->isDetached())) {
+                        throw $ex;
+                    }
+                    $msgs[] = $message;
+                }
+            } else {
+                // recipientMessages contains only one message
+                if (!($recipientMessages instanceof Message and $recipientMessages->isDetached())) {
+                    throw $ex;
+                }
+                $msgs[] = $recipientMessages;
             }
         }
 
         try {
             $this->transaction->begin();
 
-            $this->messageRepository->saveMessages($messages);
+            $this->messageRepository->saveMessages($msgs);
+            unset($msgs);
 
-            $recipientsMessages = [];
-            foreach ($messages as $recipientID => $message) {
-                $recipientMessage = new UserMessage($message, $recipientID);
-
-                $recipientsMessages[] = $recipientMessage;
+            $usersMessages = [];
+            foreach ($messages as $recipientID => $recipientMessages) {
+                if (is_array($recipientMessages)) {
+                    foreach ($recipientMessages as $message) {
+                        $recipientMessage = new UserMessage($message, $recipientID);
+                        $usersMessages[] = $recipientMessage;
+                    }
+                } else {
+                    $recipientMessage = new UserMessage($recipientMessages, $recipientID);
+                    $usersMessages[] = $recipientMessage;
+                }
             }
 
-            $this->userMessageRepository->sendMessagesToRecipients($recipientsMessages);
+            $this->userMessageRepository->sendMessagesToRecipients($usersMessages);
 
             $this->transaction->commit();
+
+            return $usersMessages;
 
         } catch (\DibiException $e) {
             $this->transaction->rollback();
@@ -236,7 +264,7 @@ class MessagesFacade extends BaseFacade
      */
     public function removeMessage($messageID, $type, $user = null)
     {
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         $this->callMessageActionBasedOnType(
             $type,
@@ -260,7 +288,7 @@ class MessagesFacade extends BaseFacade
      */
     public function removeMessages(array $messagesIDs, $type, $user = null)
     {
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         $this->callMessageActionBasedOnType(
             $type,
