@@ -9,10 +9,10 @@ DROP TABLE IF EXISTS `invitation`;
 CREATE TABLE `invitation` (
   `invitationID` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(70) COLLATE utf8_czech_ci NOT NULL,
-  `regHash` char(32) COLLATE utf8_czech_ci NOT NULL,
+  `token` char(32) COLLATE utf8_czech_ci NOT NULL,
   `validity` datetime DEFAULT NULL,
   PRIMARY KEY (`invitationID`),
-  UNIQUE KEY `email_regHash_UNIQUE` (`email`,`regHash`)
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 
 

@@ -42,6 +42,14 @@ class UserMessageRepository extends BaseRepository
         }
 
         $this->connection->query('INSERT INTO %n %ex', $this->getTable(), $values);
+
+        $insertedID = $this->connection->getInsertId(); // first inserted ID
+        foreach ($messages as $userMessage) {
+            $userMessage->makeAlive($this->entityFactory, $this->connection, $this->mapper);
+            $userMessage->attach($insertedID);
+
+            ++$insertedID;
+        }
     }
 
     /**

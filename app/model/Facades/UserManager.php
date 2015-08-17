@@ -4,12 +4,13 @@ namespace App\Model\Facades;
 
 use App\Model\Entities\Invitation;
 use App\Model\Entities\User;
+use Nette\Utils\Validators;
 use App\Model\Repositories;
 use \Exceptions\Runtime;
 use Tracy\Debugger;
-use Nette;
+use Nette\Object;
 
-class UserManager extends Nette\Object
+class UserManager extends Object
 {
     /**
      *
@@ -55,18 +56,22 @@ class UserManager extends Nette\Object
     }
 
     /**
-     *
+     * @param string $email
      * @param string $token
      * @return Invitation
-     * @throws Runtime\TokenNotFoundException
-     * @throws Runtime\TokenValidityExpiredException
+     * @throws Runtime\InvitationNotFoundException
+     * @throws Runtime\InvitationExpiredException
      */
-    public function checkToken($token)
+    public function checkInvitation($email, $token)
     {
-        $invitation = $this->invitationRepository->checkToken($token);
-        if (!$this->isInvitationTimeValid($invitation->validity)) {
+        Validators::assert($email, 'email');
+
+        $invitation = $this->invitationRepository
+                           ->checkInvitation($email, $token);
+
+        if (!$this->isInvitationTimeValid($invitation)) {
             $this->removeInvitation($invitation);
-            throw new Runtime\TokenValidityExpiredException;
+            throw new Runtime\InvitationExpiredException;
         }
 
         return $invitation;
@@ -115,7 +120,8 @@ class UserManager extends Nette\Object
 
     /**
      * @param $userID
-     * @return mixed
+     * @return User
+     * @throws Runtime\UserNotFoundException
      */
     public function getUserByID($userID)
     {
@@ -147,32 +153,30 @@ class UserManager extends Nette\Object
      */
     public function insertInvitation($email)
     {
-        $invitation = $this->invitationRepository->getInvitation($email);
-        if ($invitation instanceof Invitation) {
-
-            if (!$this->isInvitationTimeValid($invitation->validity)) {
-                 $this->removeInvitation($invitation);
-            } else {
-                 throw new Runtime\InvitationAlreadyExistsException;
-            }
-        }
-
-        $regHash = \Nette\Utils\Random::generate(32);
-        $currentDate = new \DateTime;
+        Validators::assert($email, 'email');
 
         $invitation = new Invitation(
             $email,
-            $regHash,
-            $currentDate->modify('+1 week')
+            (new \DateTime)->modify('+1 week')
         );
 
-        $this->invitationRepository->persist($invitation);
+        try {
+            $this->invitationRepository->insertInvitation($invitation);
+
+        } catch (Runtime\InvitationAlreadyExistsException $ie) {
+            if (!$this->isInvitationTimeValid($invitation)) {
+                $this->invitationRepository->removeInvitationByEmail($email);
+            }
+
+            throw $ie;
+        }/* catch (\DibiException $e) {
+
+        }*/
 
         return $invitation;
     }
 
-   /**
-     *
+    /**
      * @param User $user
      * @param Invitation $invitation
      * @return void
@@ -231,15 +235,13 @@ class UserManager extends Nette\Object
     }
 
     /**
-     * Compares given time with current time
-     *
-     * @param \DateTime $datetime
+     * @param Invitation $invitation
      * @return boolean TRUE - valid; FALSE - invalid
      */
-    private function isInvitationTimeValid(\DateTime $datetime)
+    private function isInvitationTimeValid(Invitation $invitation)
     {
         $currentDate = new \DateTime;
-        if ($currentDate > $datetime) {
+        if ($currentDate > $invitation->validity) {
             return FALSE;
         }
 

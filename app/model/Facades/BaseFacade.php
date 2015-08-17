@@ -20,9 +20,7 @@ abstract class BaseFacade extends Object
     }
 
     /**
-     * If argument $user is null, method returns ID of currently signed in user
-     *
-     * @param \App\Model\Entities\User|int|null $user
+     * @param \App\Model\Entities\User|int $user
      * @return int
      */
     protected function getUserID($user)
@@ -32,8 +30,6 @@ abstract class BaseFacade extends Object
             $id = $user->userID;
         } else if (Validators::is($user, 'numericint')) {
             $id = $user;
-        } else if (is_null($user)) {
-            $id = $this->user->id;
         } else {
             throw new InvalidArgumentException(
                 'Argument $user must be instance of \App\Model\Entities\User
@@ -42,5 +38,18 @@ abstract class BaseFacade extends Object
         }
 
         return $id;
+    }
+
+    /**
+     * @param \App\Model\Entities\User|int|null $user
+     * @return int
+     */
+    protected function getIdOfSignedInUserOnNull($user = null)
+    {
+        if ($user === null) {
+            return $this->user->id;
+        } else {
+            return $this->getUserID($user);
+        }
     }
 }

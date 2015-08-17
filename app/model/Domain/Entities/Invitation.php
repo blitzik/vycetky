@@ -4,32 +4,37 @@ namespace App\Model\Entities;
 
 use Exceptions\Logic\InvalidArgumentException;
 use Nette\Utils\Validators;
+use Nette\Utils\Random;
 use DateTime;
 
 /**
  * @property-read int $invitationID
  * @property string $email
- * @property string $regHash
+ * @property-read string $token
  * @property \DateTime $validity
  */
 class Invitation extends BaseEntity
 {
     /**
      * @param string $email
-     * @param string $regHash
      * @param DateTime $validity
      * @return Invitation
      */
     public function __construct(
         $email,
-        $regHash,
         DateTime $validity
     ) {
         $this->row = \LeanMapper\Result::createDetachedInstance()->getRow();
 
         $this->setEmail($email);
-        $this->setRegHash($regHash);
         $this->setValidity($validity);
+
+        $this->generateToken();
+    }
+
+    private function generateToken()
+    {
+        $this->row->token = Random::generate(32);
     }
 
     /**
@@ -41,17 +46,6 @@ class Invitation extends BaseEntity
         Validators::assert($email, 'email');
 
         $this->row->email = $email;
-    }
-
-    /**
-     * @param string $regHash
-     */
-    public function setRegHash($regHash)
-    {
-        $regHash = trim($regHash);
-        Validators::assert($regHash, 'string:32');
-
-        $this->row->regHash = $regHash;
     }
 
     /**

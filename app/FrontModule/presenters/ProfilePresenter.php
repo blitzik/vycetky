@@ -191,6 +191,7 @@ class ProfilePresenter extends SecurityPresenter
             );
 
         } catch (InvalidStateException $e) {
+            $this->userManager->removeInvitation($invitation);
             Debugger::log($e, Debugger::ERROR);
             $this->flashMessage(
                 'Registrační pozvánku nebylo možné odeslat. Zkuste to prosím později.',

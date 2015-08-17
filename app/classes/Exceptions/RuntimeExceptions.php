@@ -22,15 +22,13 @@ namespace Exceptions\Runtime;
 
         class UserAlreadyExistsException extends RuntimeException {}
 
-        class InvitationNotFoundException extends RuntimeException {}
+        class InvitationValidityException extends RuntimeException {}
 
-        class InvitationAlreadyExistsException extends RuntimeException {}
+            class InvitationNotFoundException extends InvitationValidityException {}
 
-        class TokenValidityException extends RuntimeException {}
+            class InvitationAlreadyExistsException extends InvitationValidityException {}
 
-        class TokenNotFoundException extends TokenValidityException {}
-
-        class TokenValidityExpiredException extends TokenValidityException {}
+            class InvitationExpiredException extends InvitationValidityException {}
 
         class InvalidUserInvitationEmailException extends RuntimeException {}
         

@@ -14,7 +14,7 @@
    Registrační pozvánka má platnost do <strong>{$invitation->validity->format('d.m.Y H:i:s')}</strong>.<br>
    Svou registraci můžete započnout na adrese:</p>
 
-{var $registrationLink = $link->link('User:Account:registration', ['token' => $invitation->regHash])}
+{var $registrationLink = $link->link('User:Account:registration', ['email' => $invitation->email, 'token' => $invitation->token])}
 <p style="padding: 8px; border: 1px solid #ccc"><a href="{$registrationLink}">{$registrationLink}</a></p>
 
 <p>S přáním pěkného dne,<br>

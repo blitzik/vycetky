@@ -89,7 +89,7 @@ class ListingFacade extends BaseFacade
     public function getEntireListingByID($id, $user = null)
     {
         Validators::assert($id, 'numericint');
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         return $this->listingRepository
                     ->getEntireListingByID($id, $userID);
@@ -117,7 +117,7 @@ class ListingFacade extends BaseFacade
     {
         Validators::assert($year, 'numericint');
         Validators::assert($month, 'numericint|null');
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         return $this->listingRepository
                     ->findUserListingsByPeriod(
@@ -140,7 +140,7 @@ class ListingFacade extends BaseFacade
     ) {
         Validators::assert($year, 'numericint');
         Validators::assert($month, 'numericint');
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         $listings =  $this->listingRepository
                           ->findPartialListings(
@@ -473,7 +473,7 @@ class ListingFacade extends BaseFacade
             );
         }
 
-        $userID = $this->getUserID($user);
+        $userID = $this->getIdOfSignedInUserOnNull($user);
 
         $items = $this->itemService->getMergedListOfItems(
             $baseListing,
