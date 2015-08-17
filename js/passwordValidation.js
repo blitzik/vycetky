@@ -12,7 +12,7 @@
 
         var arePasswordsEqual = function (pass, pass2) {
             if (pass != pass2) {
-                controlMessage.text('Hesla se neshodují').css('color', '#E81554');
+                controlMessage.text('Hesla se neshodují').css('color', '#F2B6B6');
                 saveButton.attr('disabled', true).css('opacity', '0.5');
             } else {
                 controlMessage.text('Hesla souhlasí').css('color', '#72D62F');
@@ -23,7 +23,7 @@
         pass.on('keyup', function () {
             var self = $(this);
             if (self.val().length < 5) {
-                passMessage.text('Heslo musí mít nejméně 5 znaků').css('color', '#ED5C5C');
+                passMessage.text('Heslo musí mít nejméně 5 znaků');
                 controlMessage.text('Kontrola hesla:').css('color', '');
                 saveButton.attr('disabled', true).css('opacity', '0.5');
             } else {
