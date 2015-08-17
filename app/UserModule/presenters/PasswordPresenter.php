@@ -179,8 +179,7 @@ class PasswordPresenter extends BasePresenter
         }
 
         try {
-            $this->user->token = null;
-            $this->user->tokenValidity = null;
+            $this->user->resetToken();
             $this->user->password = $values['password'];
 
             $this->userManager->saveUser($this->user);

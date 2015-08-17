@@ -140,22 +140,22 @@ class LocalityRepository extends BaseRepository
     public function setupLocality(Locality $locality)
     {
         try {
-            $this->persist($locality);
+            $this->connection
+                 ->query('INSERT INTO [locality]', ['name' => $locality->name],
+                         'ON DUPLICATE KEY UPDATE
+                          localityID = LAST_INSERT_ID(localityID)');
+
+            $id = $this->connection->getInsertId();
+            if (!$locality->isDetached()) {
+                $locality->detach();
+            }
+
+            $locality->makeAlive($this->entityFactory, $this->connection, $this->mapper);
+            $locality->attach($id);
+
             return $locality;
 
         } catch (\DibiException $e) {
-            if ($e->getCode() === 1062) {
-                $val = $this->connection
-                                   ->select('localityID AS id')
-                                   ->from($this->getTable())
-                                   ->where('name = ?', $locality->name)
-                                   ->fetch();
-
-                $locality->makeAlive($this->entityFactory, $this->connection, $this->mapper);
-                $locality->attach($val['id']);
-
-                return $locality;
-            }
 
             Debugger::log($e, Debugger::ERROR);
             throw $e;

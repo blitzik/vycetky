@@ -45,26 +45,28 @@ class WorkedHoursRepository extends BaseRepository
      */
     public function setupWorkedHours(WorkedHours $workedHours)
     {
-        if (empty($workedHours->getModifiedRowData())) {
-            return $workedHours;
-        }
+        $values = ['workStart' => $workedHours->workStart->getTime(),
+                   'workEnd' => $workedHours->workEnd->getTime(),
+                   'lunch' => $workedHours->lunch->getTime(),
+                   'otherHours' => $workedHours->otherHours->getTime()];
 
         try {
-            $this->persist($workedHours);
-            return $workedHours;
-        } catch (\DibiException $e) {
-            if ($e->getCode() === 1062) {
-                $val = $this->connection
-                            ->select('workedHoursID AS id')
-                            ->from($this->getTable())
-                            ->where('%and', $workedHours->getRowData())
-                            ->fetch();
+            $this->connection
+                 ->query('INSERT INTO [worked_hours]', $values, '
+                          ON DUPLICATE KEY UPDATE
+                          workedHoursID = LAST_INSERT_ID(workedHoursID)');
 
-                $workedHours->makeAlive($this->entityFactory, $this->connection, $this->mapper);
-                $workedHours->attach($val['id']);
-
-                return $workedHours;
+            $id = $this->connection->getInsertId();
+            if (!$workedHours->isDetached()) {
+                $workedHours->detach();
             }
+
+            $workedHours->makeAlive($this->entityFactory, $this->connection, $this->mapper);
+            $workedHours->attach($id);
+
+            return $workedHours;
+
+        } catch (\DibiException $e) {
 
             Debugger::log($e, Debugger::ERROR);
             throw $e;
