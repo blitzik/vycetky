@@ -26,4 +26,4 @@ Assert::exception(function () use ($service, $localities) {
     $service->prepareTagsForAutocomplete($localities);
 
 }, 'Exceptions\Logic\InvalidArgumentException',
-   'Function parameter can only consist of Locality Entities.');
+   'Function argument $localities can only consist of '.\App\Model\Entities\Locality::class.' Entities.');

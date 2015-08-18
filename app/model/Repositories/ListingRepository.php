@@ -4,6 +4,7 @@ namespace App\Model\Repositories;
 
 use Exceptions\Runtime\ListingNotFoundException;
 use Exceptions\Logic\InvalidArgumentException;
+use Nette\Utils\Validators;
 use \App\Model\Entities;
 use LeanMapper\Fluent;
 
@@ -52,13 +53,17 @@ class ListingRepository extends BaseRepository
     }
 
     /**
-     * @param $userID
-     * @param $year
-     * @param $month
+     * @param int $userID
+     * @param int $year
+     * @param int $month
      * @return array
      */
     public function findUserListingsByPeriod($userID, $year, $month = null)
     {
+        Validators::assert($userID, 'numericint');
+        Validators::assert($year, 'numericint');
+        Validators::assert($month, 'numericint');
+
         $result = $this->getListing(
             function (Fluent $st, $userID, $year, $month) {
                 $st->select('l.*');
@@ -82,13 +87,17 @@ class ListingRepository extends BaseRepository
     }
 
     /**
-     * @param $userID
-     * @param $year
-     * @param $month
+     * @param int $userID
+     * @param int $year
+     * @param int $month
      * @return Entities\Listing[]
      */
     public function findPartialListings($userID, $year, $month)
     {
+        Validators::assert($userID, 'numericint');
+        Validators::assert($year, 'numericint');
+        Validators::assert($month, 'numericint');
+
         $result = $this->connection
                        ->select('listingID, year, month, description')
                        ->from($this->getTable())
@@ -110,6 +119,9 @@ class ListingRepository extends BaseRepository
      */
     public function getEntireListingByID($listingID, $userID)
     {
+        Validators::assert($listingID, 'numericint');
+        Validators::assert($userID, 'numericint');
+
         $result = $this->getListing(
             function (Fluent $st, $listingID, $userID) {
                 $st->select('l.*');
@@ -143,11 +155,17 @@ class ListingRepository extends BaseRepository
 
 
     /**
-     * @param $userID
+     * @param int $userID
+     * @param int $year
+     * @param int $month
      * @return int
      */
     public function getNumberOfUserListingsByPeriod($userID, $year, $month)
     {
+        Validators::assert($userID, 'numericint');
+        Validators::assert($year, 'numericint');
+        Validators::assert($month, 'numericint');
+
         $query = $this->connection->select('COUNT(listingID) as numberOfListings')
                                   ->from($this->getTable())
                                   ->where('userID = ?', $userID);

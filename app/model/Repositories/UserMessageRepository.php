@@ -5,12 +5,14 @@ namespace App\Model\Repositories;
 use Exceptions\Logic\InvalidArgumentException;
 use App\Model\Entities\UserMessage;
 use App\Model\Entities\Message;
-use Tracy\Debugger;
+use Nette\Utils\Validators;
 
 class UserMessageRepository extends BaseRepository
 {
     public function markMessageAsRead(Message $message, $recipientID)
     {
+        Validators::assert($recipientID, 'numericint');
+
         if ($message->isDetached()) {
             throw new InvalidArgumentException(
                 'Argument $message must be attached entity.'
@@ -58,6 +60,9 @@ class UserMessageRepository extends BaseRepository
      */
     public function removeMessage($messageID, $recipientID)
     {
+        Validators::assert($messageID, 'numericint');
+        Validators::assert($recipientID, 'numericint');
+
         $this->connection
              ->query('UPDATE %n', $this->getTable(),
                      'SET deleted = 1
@@ -71,6 +76,8 @@ class UserMessageRepository extends BaseRepository
      */
     public function removeMessages(array $IDs, $recipientID)
     {
+        Validators::assert($recipientID, 'numericint');
+
         $this->connection->query('UPDATE %n', $this->getTable(),
                                  'SET deleted = 1
                                   WHERE messageID IN (?)', $IDs,

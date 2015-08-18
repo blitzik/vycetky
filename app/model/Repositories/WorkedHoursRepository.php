@@ -3,11 +3,15 @@
 namespace App\Model\Repositories;
 
 use App\Model\Entities\WorkedHours;
+use Nette\Utils\Validators;
 use Tracy\Debugger;
 
 class WorkedHoursRepository extends BaseRepository
 {
-
+    /**
+     * @param array $conditions
+     * @return WorkedHours
+     */
     public function getByValues(array $conditions)
     {
         $result = $this->connection->select('*')
@@ -23,6 +27,8 @@ class WorkedHoursRepository extends BaseRepository
 
     public function getTotalWorkedStatistics($userID)
     {
+        Validators::assert($userID, 'numericint');
+
         $result = $this->connection->query(
             'SELECT SUM(time_to_sec(ADDTIME(
                         SUBTIME(SUBTIME(wh.workEnd, wh.workStart), wh.lunch),

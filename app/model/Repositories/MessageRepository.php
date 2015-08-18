@@ -5,17 +5,21 @@ namespace App\Model\Repositories;
 use Exceptions\Runtime\MessageNotFoundException;
 use Exceptions\Logic\InvalidArgumentException;
 use App\Model\Entities\Message;
+use Nette\Utils\Validators;
 
 class MessageRepository extends BaseRepository
 {
     /**
-     * @param $messageID
-     * @param $recipientID
+     * @param int $messageID
+     * @param int $recipientID
      * @return Message
      * @throws MessageNotFoundException
      */
     public function getReceivedMessage($messageID, $recipientID)
     {
+        Validators::assert($messageID, 'numericint');
+        Validators::assert($recipientID, 'numericint');
+
         $message = $this->connection
             ->select('m.*, [um.read] AS isRead, 1 AS isReceived')
             ->from('user_message um')
@@ -31,13 +35,16 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @param $messageID
-     * @param $authorID
+     * @param int $messageID
+     * @param int $authorID
      * @return Message
      * @throws MessageNotFoundException
      */
     public function getSentMessage($messageID, $authorID)
     {
+        Validators::assert($messageID, 'numericint');
+        Validators::assert($authorID, 'numericint');
+
         $message = $this->connection
             ->select('*, 1 AS isRead, 0 AS isReceived')
             ->from($this->getTable())
@@ -53,19 +60,24 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @param $userID
-     * @param $MessageType
-     * @param $offset
-     * @param $length
+     * @param int $userID
+     * @param string $messageType
+     * @param int $offset
+     * @param int $length
      * @return Message[] Array of Messages or empty array
      */
-    public function findReceivedMessages($userID, $MessageType, $offset, $length)
+    public function findReceivedMessages($userID, $messageType, $offset, $length)
     {
+        Validators::assert($userID, 'numericint');
+        Validators::assert($messageType, 'numericint');
+        Validators::assert($offset, 'numericint');
+        Validators::assert($length, 'numericint');
+
         $results = $this->connection
             ->select('m.messageID, m.sent, m.subject, m.author, m.deleted, 1 AS isReceived')
             ->from('user_message um FORCE INDEX(recipient_read_deleted_messageID)')
             ->innerJoin('message m ON (m.messageID = um.messageID)')
-            ->where('um.recipient = ? AND [um.read] = ? AND um.deleted = 0', $userID, $MessageType)
+            ->where('um.recipient = ? AND [um.read] = ? AND um.deleted = 0', $userID, $messageType)
             ->offset($offset)
             ->limit($length)
             ->orderBy('um.messageID DESC')->fetchAll();
@@ -74,12 +86,15 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @param $userID
-     * @param $messageType
+     * @param int $userID
+     * @param string $messageType
      * @return int
      */
     public function getNumberOfReceivedMessages($userID, $messageType)
     {
+        Validators::assert($userID, 'numericint');
+        Validators::assert($messageType, 'numericint');
+
         $result = $this->connection
             ->select('COUNT(userMessageID) AS count')
             ->from('user_message')
@@ -91,13 +106,17 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @param $userID
-     * @param $offset
-     * @param $length
+     * @param int $userID
+     * @param int $offset
+     * @param int $length
      * @return Message[] Array of Messages or empty array
      */
     public function findSentMessages($userID, $offset, $length)
     {
+        Validators::assert($userID, 'numericint');
+        Validators::assert($offset, 'numericint');
+        Validators::assert($length, 'numericint');
+
         $result = $this->connection
             ->select('messageID, sent, subject, author, deleted, 0 AS isReceived')
             ->from($this->getTable() . ' FORCE INDEX(author_deleted_messageID)')
@@ -111,11 +130,13 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @param $userID
+     * @param int $userID
      * @return int
      */
     public function getNumberOfSentMessages($userID)
     {
+        Validators::assert($userID, 'numericint');
+
         $result = $this->connection
             ->select('COUNT(messageID) AS count')
             ->from($this->getTable())
@@ -133,6 +154,9 @@ class MessageRepository extends BaseRepository
      */
     public function removeAuthorMessage($messageID, $authorID)
     {
+        Validators::assert($messageID, 'numericint');
+        Validators::assert($authorID, 'numericint');
+
         $this->connection
              ->query('UPDATE %n', $this->getTable(), '
                       SET deleted = 1
@@ -146,6 +170,8 @@ class MessageRepository extends BaseRepository
      */
     public function removeAuthorMessages(array $messagesIDs, $authorID)
     {
+        Validators::assert($authorID, 'numericint');
+
         $this->connection
              ->query('UPDATE %n', $this->getTable(),
                      'SET deleted = 1

@@ -63,7 +63,7 @@ class ListingFacadeTest extends BaseFacadeTest
             $this->listingFacade->establishListingCopy($listing);
 
         }, 'Exceptions\Logic\InvalidArgumentException',
-           'Argument $listing must be attached Entity.');
+           'Argument $listing must be attached instance of ' . \App\Model\Entities\Listing::class);
     }
 
     public function testChangeItemsInListing()
@@ -128,7 +128,7 @@ class ListingFacadeTest extends BaseFacadeTest
                 );
             },
             'Exceptions\Logic\InvalidArgumentException',
-            'Argument $listing must be attached Entity.'
+            'Argument $listing must be attached instance of ' . \App\Model\Entities\Listing::class
         );
 
     }
@@ -184,7 +184,7 @@ class ListingFacadeTest extends BaseFacadeTest
                 );
             },
             'Exceptions\Logic\InvalidArgumentException',
-            'Argument $listing must be attached Entity.'
+            'Argument $listing must be attached instance of ' . \App\Model\Entities\Listing::class
         );
     }
 
@@ -257,7 +257,7 @@ class ListingFacadeTest extends BaseFacadeTest
                 );
             },
             'Exceptions\Logic\InvalidArgumentException',
-            'Argument $listing must be attached Entity.'
+            'Argument $listing must be attached instance of ' . \App\Model\Entities\Listing::class
         );
 
     }

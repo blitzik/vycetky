@@ -14,7 +14,6 @@ use App\Model\Entities\ListingItem;
 use App\Model\Services\ItemService;
 use App\Model\Entities\Locality;
 use App\Model\Entities\Listing;
-use Nette\Utils\Validators;
 use Nette\Security\User;
 use Tracy\Debugger;
 

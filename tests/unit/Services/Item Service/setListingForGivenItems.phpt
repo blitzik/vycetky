@@ -47,7 +47,7 @@ Assert::exception(function () use ($service, $items) {
     $service->setListingForGivenItems($items, $listing);
 
 }, 'Exceptions\Logic\InvalidArgumentException',
-   'Only attached(not detached) Listing entity can pass!');
+   'Only attached(not detached) '.\App\Model\Entities\Listing::class.' entity can pass!');
 
 Assert::exception(function () use ($service, $items, $listing) {
 
@@ -56,4 +56,4 @@ Assert::exception(function () use ($service, $items, $listing) {
     $service->setListingForGivenItems($items, $listing);
 
 }, 'Exceptions\Logic\InvalidArgumentException',
-   'Invalid set of ListingItems given.');
+   'Only instances of ' .\App\Model\Entities\ListingItem::class. ' can pass.');

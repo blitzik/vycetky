@@ -32,7 +32,7 @@ abstract class BaseFacade extends Object
             $id = $user;
         } else {
             throw new InvalidArgumentException(
-                'Argument $user must be instance of \App\Model\Entities\User
+                'Argument $user must be instance of '.User::class.'
                  or integer number.'
             );
         }

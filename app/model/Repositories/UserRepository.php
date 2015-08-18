@@ -2,8 +2,9 @@
 
 namespace App\Model\Repositories;
 
-use App\Model\Entities\User;
 use Exceptions\Runtime\UserNotFoundException;
+use App\Model\Entities\User;
+use Nette\Utils\Validators;
 
 class UserRepository extends BaseRepository
 {
@@ -38,6 +39,8 @@ class UserRepository extends BaseRepository
      */
     public function getUserByID($userID)
     {
+        Validators::assert($userID, 'numericint');
+
         $user =  $this->connection->select('*')
                                   ->from($this->getTable())
                                   ->where('userID = ?', $userID)
@@ -58,6 +61,8 @@ class UserRepository extends BaseRepository
      */
     public function findByEmail($email)
     {
+        Validators::assert($email, 'email');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('email = ?', $email)
@@ -78,6 +83,8 @@ class UserRepository extends BaseRepository
      */
     public function findByUsername($username)
     {
+        Validators::assert($username, 'string');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('username = ?', $username)
@@ -98,6 +105,8 @@ class UserRepository extends BaseRepository
      */
     public function checkUsername($username)
     {
+        Validators::assert($username, 'string');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('username = ?', $username)
@@ -116,6 +125,8 @@ class UserRepository extends BaseRepository
      */
     public function checkEmail($email)
     {
+        Validators::assert($email, 'email');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('email = ?', $email)

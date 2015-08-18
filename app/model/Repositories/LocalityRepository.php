@@ -3,16 +3,19 @@
 namespace App\Model\Repositories;
 
 use App\Model\Entities\Locality;
+use Nette\Utils\Validators;
 use Tracy\Debugger;
 
 class LocalityRepository extends BaseRepository
 {
     /**
-     * @param $id
-     * @return mixed
+     * @param int $id
+     * @return Locality
      */
     public function findById($id)
     {
+        Validators::assert($id, 'numericint');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('localityID = ?', $id)
@@ -25,11 +28,13 @@ class LocalityRepository extends BaseRepository
     }
 
     /**
-     * @param $localityName
-     * @return mixed
+     * @param string $localityName
+     * @return Locality
      */
     public function findByName($localityName)
     {
+        Validators::assert($localityName, 'string');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('name = ?', $localityName)
@@ -43,12 +48,16 @@ class LocalityRepository extends BaseRepository
     }
 
     /**
-     * @param $localityName
-     * @param $userID
+     * @param string $localityName
+     * @param int $userID
      * @return array
      */
     public function findSimilarByName($localityName, $userID, $limit)
     {
+        Validators::assert($localityName, 'string');
+        Validators::assert($userID, 'numericint');
+        Validators::assert($limit, 'numericint');
+
         $results = $this->connection->select('l.localityID, l.name')
                         ->from($this->getTable())->as('l')
                         ->innerJoin('locality_user lu
@@ -61,8 +70,14 @@ class LocalityRepository extends BaseRepository
         return $this->createEntities($results);
     }
 
+    /**
+     * @param int $userID
+     * @return int
+     */
     public function getNumberOfUserLocalities($userID)
     {
+        Validators::assert($userID, 'numericint');
+
         $result = $this->connection
                        ->select('COUNT(localityUserID) as count')
                        ->from('locality_user')
@@ -84,11 +99,13 @@ class LocalityRepository extends BaseRepository
     }
 
     /**
-     * @param $userID
+     * @param int $userID
      * @return array
      */
     public function findAllUserLocalities($userID)
     {
+        Validators::assert($userID, 'numericint');
+
         $results = $this->connection->select('l.localityID, l.name')
                         ->from($this->getTable())->as('l')
                         ->innerJoin('locality_user lu
@@ -101,18 +118,27 @@ class LocalityRepository extends BaseRepository
     }
 
     /**
-     * @param $localityID
-     * @param $userID
+     * @param int $localityID
+     * @param int $userID
      */
     public function removeUserLocality($localityID, $userID)
     {
+        Validators::assert($localityID, 'numericint');
+        Validators::assert($userID, 'numericint');
+
         $this->connection->delete('locality_user')
                          ->where('localityID = ? AND userID = ?',
                                  $localityID, $userID)->execute();
     }
 
+    /**
+     * @param array $localitiesIDs
+     * @param int $userID
+     */
     public function removeLocalities(array $localitiesIDs, $userID)
     {
+        Validators::assert($userID, 'numericint');
+
         $this->connection->delete('locality_user')
                          ->where('userID = ?', $userID)
                          ->where('localityID IN (?)', $localitiesIDs)
@@ -125,6 +151,8 @@ class LocalityRepository extends BaseRepository
      */
     public function saveLocalityToUserList(Locality $locality, $userID)
     {
+        Validators::assert($userID, 'numericint');
+
         $this->connection
              ->query('INSERT IGNORE INTO locality_user',
                  ['localityID' => $locality->localityID,

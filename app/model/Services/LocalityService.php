@@ -18,7 +18,7 @@ class LocalityService extends Object
         foreach ($localities as $locality) {
             if (!($locality instanceof Locality))
                 throw new InvalidArgumentException(
-                    'Function parameter can only consist of Locality Entities.'
+                    'Function argument $localities can only consist of '.Locality::class.' Entities.'
                 );
 
             $tags[] = $locality->name;

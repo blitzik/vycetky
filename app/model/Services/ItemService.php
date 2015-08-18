@@ -25,7 +25,7 @@ class ItemService extends Object
             if (!$listingItem instanceof Entities\ListingItem or
                 $listingItem->isDetached()) {
                 throw new InvalidArgumentException(
-                    'Invalid set of ListingItems given.'
+                    'Only attached instances of ' .Entities\ListingItem::class. ' can pass.'
                 );
             }
             $collection[] = clone $listingItem;
@@ -45,14 +45,14 @@ class ItemService extends Object
     ) {
         if ($listing->isDetached())
             throw new InvalidArgumentException(
-                'Only attached(not detached) Listing entity can pass!'
+                'Only attached(not detached) '.Entities\Listing::class.' entity can pass!'
             );
 
         $newItemsCollection = [];
         foreach ($listingItems as $listingItem) {
             if (!$listingItem instanceof Entities\ListingItem) {
                 throw new InvalidArgumentException(
-                    'Invalid set of ListingItems given.'
+                    'Only instances of ' .Entities\ListingItem::class. ' can pass.'
                 );
             }
             $listingItem->setListing($listing);
@@ -80,7 +80,7 @@ class ItemService extends Object
                 $collection[$listingItem->day] = new ListingItemDecorator($listingItem);
             } else {
                 throw new InvalidArgumentException(
-                    'Only instances of Entities\ListingItem or Domain\FillingItem can be processed'
+                    'Only instances of '.Entities\ListingItem::class.' or '.FillingItem::class.' can be processed'
                 );
             }
         }
@@ -156,7 +156,7 @@ class ItemService extends Object
             if (array_key_exists($day, $listingItemsDecorators)) {
                 if (!$listingItemsDecorators[$day] instanceof IDisplayableItem) {
                     throw new InvalidArgumentException(
-                        'Only instances of ListingItemDecorator can pass.'
+                        'Only instances of '.ListingItemDecorator::class.' can pass.'
                     );
                 }
                 $list[$day] = $listingItemsDecorators[$day];
@@ -229,7 +229,7 @@ class ItemService extends Object
         if (!$listingItem instanceof Entities\ListingItem or
              $listingItem->isDetached()) {
             throw new InvalidArgumentException(
-                'Only Attached instances of ListingItem can pass.'
+                'Only Attached instances of '.Entities\ListingItem::class.' can pass.'
             );
         }
     }

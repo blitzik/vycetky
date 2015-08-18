@@ -201,7 +201,7 @@ class MessagesFacade extends BaseFacade
     public function sendMessages(array $messages)
     {
         $ex = new InvalidArgumentException(
-            'Only non-persisted instances of App\Model\Entities\Message can pas.'
+            'Only non-persisted instances of ' .Message::class. ' can pas.'
         );
 
         $msgs = [];

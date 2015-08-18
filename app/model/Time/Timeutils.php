@@ -3,6 +3,7 @@
 namespace App\Model\Time;
 
 use Exceptions\Logic\InvalidArgumentException;
+use Gedmo\ReferenceIntegrity\Mapping\Validator;
 use Nette\Utils\Validators;
 use Nette\Object;
 
@@ -106,19 +107,20 @@ final class TimeUtils extends Object
 
     /**
      *
-     * @param int Year
-     * @param int Month
+     * @param int $year
+     * @param int $month
+     * @param int|null $day
      * @return boolean|\DateTime Returns DateTime if the given date is valid, otherwise returns FALSE
      */
-    public static function getDateTimeFromParameters($year, $month, $day = NULL)
+    public static function getDateTimeFromParameters($year, $month, $day = null)
     {
-        if (!Validators::is($year, 'numericint') OR
-            !Validators::is($month, 'numericint') OR
-            !Validators::is($day, 'numericint|null')) {
+        if (!Validators::is($year, 'numericint') or
+            !Validators::is($month, 'numericint') or
+            !Validators::is($day, 'null|numericint')) {
             return FALSE;
         }
 
-        if ($day == NULL) {
+        if ($day == null) {
             if (\checkdate($month, 1, $year)) {
                 return new \DateTime($year.'-'.$month);
             }

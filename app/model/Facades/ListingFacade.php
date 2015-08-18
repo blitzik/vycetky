@@ -537,7 +537,9 @@ class ListingFacade extends BaseFacade
     private function checkListingValidity(Listing $listing)
     {
         if ($listing->isDetached()) {
-            throw new InvalidArgumentException('Argument $listing must be attached Entity.');
+            throw new InvalidArgumentException(
+                'Argument $listing must be attached instance of ' . Listing::class
+            );
         }
     }
 

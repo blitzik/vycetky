@@ -5,7 +5,7 @@ namespace App\Model\Repositories;
 use Exceptions\Runtime\ListingItemNotFoundException;
 use Exceptions\Logic\InvalidArgumentException;
 use \App\Model\Entities;
-use Tracy\Debugger;
+use Nette\Utils\Validators;
 
 class ListingItemRepository extends BaseRepository
 {
@@ -17,6 +17,9 @@ class ListingItemRepository extends BaseRepository
      */
     public function getListingItem($listingItemID, $listingID)
     {
+        Validators::assert($listingItemID, 'numericint');
+        Validators::assert($listingID, 'numericint');
+
         $result = $this->connection->select('*')
             ->from($this->getTable())
             ->where('listingItemID = ? AND listingID = ?',
@@ -31,12 +34,15 @@ class ListingItemRepository extends BaseRepository
 
     /**
      *
-     * @param \DateTime $day
+     * @param int $day
      * @param int $listingID
      * @return Entities\ListingItem
      */
     public function getByDayInListing($day, $listingID)
     {
+        Validators::assert($day, 'numericint');
+        Validators::assert($listingID, 'numericint');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where(
@@ -52,11 +58,13 @@ class ListingItemRepository extends BaseRepository
     }
 
     /**
-     * @param $itemID
+     * @param int $itemID
      * @return Entities\ListingItem
      */
     public function findByItemID($itemID)
     {
+        Validators::assert($itemID, 'numericint');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('listingItemID = ?', $itemID)
@@ -69,11 +77,13 @@ class ListingItemRepository extends BaseRepository
     }
 
     /**
-     * @param $listingID
+     * @param int $listingID
      * @return Entities\ListingItem[]
      */
     public function findAllByListing($listingID)
     {
+        Validators::assert($listingID, 'numericint');
+
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('listingID = ?', $listingID)
@@ -90,6 +100,9 @@ class ListingItemRepository extends BaseRepository
         $day,
         $listingID
     ) {
+        Validators::assert($day, 'numericint');
+        Validators::assert($listingID, 'numericint');
+
         $this->connection->delete($this->getTable())
                          ->where('
                             listingID = ? AND
@@ -109,6 +122,9 @@ class ListingItemRepository extends BaseRepository
         $day,
         $listingID
     ) {
+        Validators::assert($day, 'numericint');
+        Validators::assert($listingID, 'numericint');
+
         $this->connection->query(
             'INSERT INTO listing_item
              (listingID, day, localityID, workedHoursID,

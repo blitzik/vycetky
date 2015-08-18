@@ -40,7 +40,7 @@ $items[] = $item2;
 Assert::exception(function () use ($service, $items) { // try to pass detached isntance
     $service->createDecoratorsCollection($items);
 }, 'Exceptions\Logic\InvalidArgumentException',
-    'Only instances of Entities\ListingItem or Domain\FillingItem can be processed');
+    'Only instances of '.\App\Model\Entities\ListingItem::class.' or '.\App\Model\Domain\FillingItem::class.' can be processed');
 
 $_er->makeAlive($items[1], 2);
 
@@ -50,4 +50,4 @@ Assert::exception(function () use ($service, $items) {
     array_unshift($items, new \App\Model\Entities\Locality('Brno'));
     $service->createDecoratorsCollection($items);
 }, 'Exceptions\Logic\InvalidArgumentException',
-   'Only instances of Entities\ListingItem or Domain\FillingItem can be processed');
+    'Only instances of '.\App\Model\Entities\ListingItem::class.' or '.\App\Model\Domain\FillingItem::class.' can be processed');

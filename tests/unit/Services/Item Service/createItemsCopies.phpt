@@ -68,7 +68,7 @@ Assert::exception(function () use ($service, $listingItems) {
     $service->createItemsCopies($listingItems);
 
 }, 'Exceptions\Logic\InvalidArgumentException',
-   'Invalid set of ListingItems given.');
+   'Only attached instances of ' .\App\Model\Entities\ListingItem::class. ' can pass.');
 
 Assert::exception(function () use (
     $service,
@@ -88,4 +88,4 @@ Assert::exception(function () use (
     $service->createItemsCopies($listingItems);
 
 }, 'Exceptions\Logic\InvalidArgumentException',
-   'Invalid set of ListingItems given.');
+   'Only attached instances of ' .\App\Model\Entities\ListingItem::class. ' can pass.');
