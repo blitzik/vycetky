@@ -99,7 +99,17 @@ class DatabaseBackupControl extends Control
 
     public function handleBackup($pass)
     {
-        $file = WWW_DIR . '/app/backup/auto-' . date('Y-m-d') . '.sql';
+        $year = date('Y');
+        $month = date('F');
+        $path = WWW_DIR . "/app/backup/$year/$month/";
+        if (!file_exists($path)) {
+            if (!mkdir($path, 0777, true)) {
+                $this->logError('mkdir() failure -> directory was not created!');
+                $this->sendMail('Automatic backup', 'Check the log file.');
+            }
+        }
+
+        $file = $path . 'auto-' . date('Y-m-d') . '.sql';
         if (!file_exists($file)) {
             if ($this->backupPassword !== null) {
                 if ($this->backupPassword != $pass) {
