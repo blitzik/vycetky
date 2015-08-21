@@ -30,6 +30,8 @@ namespace Exceptions\Runtime;
 
             class InvitationExpiredException extends InvitationValidityException {}
 
+            class InvitationTokenMatchException extends InvitationValidityException {}
+
         class InvalidUserInvitationEmailException extends RuntimeException {}
         
         class InvalidStateException extends RuntimeException {}

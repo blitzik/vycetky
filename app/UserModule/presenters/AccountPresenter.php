@@ -3,6 +3,7 @@
 namespace App\UserModule\Presenters;
 
 use App\Model\Facades\UserManager;
+use Exceptions\Runtime\InvitationValidityException;
 use Nette\Application\UI\Form;
 use App\Model\Entities\User;
 use Nette\Utils\Validators;
@@ -103,7 +104,7 @@ class AccountPresenter extends BasePresenter
                 $this->invitation = $this->userManager->checkInvitation($email, $token);
 
         } catch (\Exceptions\Runtime\InvitationValidityException $t) {
-            $this->flashMessage('Registrovat se může pouze uživatel s platnou pozvánkou.', 'error');
+            $this->flashMessage('Registrovat se může pouze uživatel s platnou pozvánkou.', 'warning');
             $this->redirect('Account:default');
         }
 
@@ -179,8 +180,9 @@ class AccountPresenter extends BasePresenter
             $this->flashMessage('Váš účet byl vytvořen. Nyní se můžete přihlásit.', 'success');
             $this->redirect('Account:default');
 
-        } catch (\Exceptions\Runtime\InvalidUserInvitationEmailException $iu) {
-            $form->addError('Vámi zadaný E-mail se neshoduje s E-mailem, na který byla odeslána pozvánka!');
+        } catch (InvitationValidityException $iu) {
+            $this->flashMessage('Registrovat se může pouze uživatel s platnou pozvánkou.', 'warning');
+            $this->redirect('Account:default');
 
         } catch (\Exceptions\Runtime\DuplicateUsernameException $du) {
             $form->addError('Vámi zvolené jméno vužívá již někdo jiný. Vyberte si prosím jiné jméno.');

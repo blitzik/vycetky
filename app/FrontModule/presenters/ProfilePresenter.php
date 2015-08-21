@@ -4,6 +4,7 @@ namespace App\FrontModule\Presenters;
 
 use Exceptions\Runtime\InvitationAlreadyExistsException;
 use App\Model\Notifications\EmailNotifier;
+use Exceptions\Runtime\UserAlreadyExistsException;
 use Nette\Application\UI\ITemplate;
 use App\Model\Entities\Invitation;
 use App\Model\Facades\UserManager;
@@ -152,24 +153,20 @@ class ProfilePresenter extends SecurityPresenter
         $value = $form->getValues();
 
         try {
-            $this->userManager->findUserByEmail($value['email']);
+            $invitation = $this->userManager->createInvitation($value['email']);
+        } catch (UserAlreadyExistsException $uae) {
             $this->flashMessage(
                 'Pozvánku nelze odeslat. Uživatel s E-Mailem ' . $value['email'] . ' je již zaregistrován.',
                 'warning'
             );
             $this->redirect('this');
 
-        } catch (\Exceptions\Runtime\UserNotFoundException $u) {
-
-            try {
-                $invitation = $this->userManager->insertInvitation($value['email']);
-            } catch (InvitationAlreadyExistsException $i) {
-                $this->flashMessage(
-                    'Pozvánka již byla odeslána uživateli s E-mailem ' .$value['email'],
-                    'warning'
-                );
-                $this->redirect('this');
-            }
+        } catch (InvitationAlreadyExistsException $iae) {
+            $this->flashMessage(
+                'Pozvánka již byla odeslána uživateli s E-mailem ' .$value['email'],
+                'warning'
+            );
+            $this->redirect('this');
         }
 
         try {

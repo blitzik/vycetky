@@ -4,6 +4,7 @@ namespace App\Model\Facades;
 
 use App\Model\Entities\Invitation;
 use App\Model\Entities\User;
+use Exceptions\Logic\InvalidArgumentException;
 use Nette\Utils\Validators;
 use App\Model\Repositories;
 use \Exceptions\Runtime;
@@ -61,17 +62,22 @@ class UserManager extends Object
      * @return Invitation
      * @throws Runtime\InvitationNotFoundException
      * @throws Runtime\InvitationExpiredException
+     * @throws Runtime\InvitationTokenMatchException
      */
     public function checkInvitation($email, $token)
     {
         Validators::assert($email, 'email');
 
         $invitation = $this->invitationRepository
-                           ->checkInvitation($email, $token);
+                           ->getInvitation($email);
 
         if (!$this->isInvitationTimeValid($invitation)) {
             $this->removeInvitation($invitation);
             throw new Runtime\InvitationExpiredException;
+        }
+
+        if ($token !== $invitation->token) {
+            throw new Runtime\InvitationTokenMatchException;
         }
 
         return $invitation;
@@ -146,51 +152,65 @@ class UserManager extends Object
     }
 
     /**
-     *
      * @param string $email
      * @return Invitation
      * @throws Runtime\InvitationAlreadyExistsException
+     * @throws Runtime\UserAlreadyExistsException
      */
-    public function insertInvitation($email)
+    public function createInvitation($email)
     {
         Validators::assert($email, 'email');
 
-        $invitation = new Invitation(
-            $email,
-            (new \DateTime)->modify('+1 week')
-        );
-
         try {
-            $this->invitationRepository->insertInvitation($invitation);
+            $this->findUserByEmail($email);
 
-        } catch (Runtime\InvitationAlreadyExistsException $ie) {
-            if (!$this->isInvitationTimeValid($invitation)) {
-                $this->invitationRepository->removeInvitationByEmail($email);
+            throw new Runtime\UserAlreadyExistsException;
+
+        } catch (Runtime\UserNotFoundException $e) {
+            $invitation = new Invitation(
+                $email,
+                (new \DateTime)->modify('+1 week')
+            );
+
+            try {
+                $this->invitationRepository->insertInvitation($invitation);
+
+            } catch (Runtime\InvitationAlreadyExistsException $ie) {
+                $existingInvitation = $this->invitationRepository->getInvitation($email);
+                if ($this->isInvitationTimeValid($existingInvitation)) {
+                    throw $ie;
+                } else {
+                    $this->removeInvitation($existingInvitation);
+                    $this->invitationRepository->insertInvitation($invitation);
+                }
             }
 
-            throw $ie;
-        }/* catch (\DibiException $e) {
-
-        }*/
-
-        return $invitation;
+            return $invitation;
+        }
     }
 
     /**
      * @param User $user
      * @param Invitation $invitation
      * @return void
-     * @throws Runtime\InvalidUserInvitationEmailException
      * @throws Runtime\DuplicateUsernameException
      * @throws Runtime\DuplicateEmailException
+     * @throws Runtime\InvitationNotFoundException
+     * @throws Runtime\InvitationExpiredException
+     * @throws Runtime\InvitationTokenMatchException
      * @throws \DibiException
      */
     public function registerNewUser(
         User $user,
         Invitation $invitation
     ) {
-        if ($user->email != $invitation->email)
-            throw new Runtime\InvalidUserInvitationEmailException;
+        if (!$user->isDetached()) {
+            throw new InvalidArgumentException(
+                'Only detached instances of Entity ' . User::class . ' can pass.'
+            );
+        }
+
+        $this->checkInvitation($user->email, $invitation->token);
 
         try {
             $this->transaction->begin();
@@ -248,6 +268,10 @@ class UserManager extends Object
         return TRUE;
     }
 
+    /**
+     * @param array|null $withoutUsers
+     * @return array
+     */
     public function findAllUsers(array $withoutUsers = null)
     {
         $users = $this->userRepository->findAllUsers($withoutUsers);

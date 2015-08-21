@@ -53,9 +53,9 @@ class InvitationRepository extends BaseRepository
     }
 
     /**
-     *
      * @param string $email
-     * @return \App\Model\Entities\Invitation|FALSE
+     * @return \App\Model\Entities\Invitation
+     * @throws \Exceptions\Runtime\InvitationNotFoundException
      */
     public function getInvitation($email)
     {
@@ -63,32 +63,7 @@ class InvitationRepository extends BaseRepository
 
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
-                                   ->where('email = ?', $email)
-                                   ->fetch();
-        if ($result == FALSE) {
-            return FALSE;
-        }
-
-        return $this->createEntity($result);
-    }
-
-    /**
-     * @param string $email
-     * @param string $token
-     * @return \App\Model\Entities\Invitation
-     * @throws \Exceptions\Runtime\InvitationNotFoundException
-     */
-    public function checkInvitation($email, $token)
-    {
-        Validators::assert($email, 'email');
-
-        $result = $this->connection->select('*')
-                                   ->from($this->getTable())
-                                   ->where('email = ? and
-                                            token = ?',
-                                            $email,
-                                            $token
-                                   )->fetch();
+                                   ->where('email = ?', $email)->fetch();
         if ($result == FALSE) {
             throw new \Exceptions\Runtime\InvitationNotFoundException;
         }
