@@ -121,7 +121,7 @@ class DatabaseBackupControl extends Control
 
             try {
                 $this->databaseBackup->save($file);
-                $this->sendMail('Automatic database backup', 'OK', $file);
+                $this->sendMail(date('Y-m-d').' - Automatic database backup', 'OK', $file);
 
             } catch (\Exception $e) {
                 $this->logError($e->getMessage());
