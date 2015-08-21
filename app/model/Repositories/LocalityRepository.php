@@ -54,7 +54,7 @@ class LocalityRepository extends BaseRepository
      */
     public function findSimilarByName($localityName, $userID, $limit)
     {
-        Validators::assert($localityName, 'string');
+        Validators::assert($localityName, 'string|null');
         Validators::assert($userID, 'numericint');
         Validators::assert($limit, 'numericint');
 

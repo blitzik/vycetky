@@ -8,12 +8,6 @@ use Nette\Utils\Validators;
 use \App\Model\Entities;
 use LeanMapper\Fluent;
 
-/**
- * vysledek totalWorkedHours v sekundach, protoze datovy typ
- * TIME v mysql ma max. hodnotu cca 850:00:00.
- * Stejne tak v Profilu uzivatele celkovy soucet odprac. hodin.
- * Konverze ze sekund na hodiny probiha pomoci filtru ve FilterLoaderu
-*/
 class ListingRepository extends BaseRepository
 {
     use TRepositoryModifiers;
@@ -62,7 +56,7 @@ class ListingRepository extends BaseRepository
     {
         Validators::assert($userID, 'numericint');
         Validators::assert($year, 'numericint');
-        Validators::assert($month, 'numericint');
+        Validators::assert($month, 'numericint|null');
 
         $result = $this->getListing(
             function (Fluent $st, $userID, $year, $month) {
@@ -139,8 +133,14 @@ class ListingRepository extends BaseRepository
         return $this->createEntity($entity);
     }
 
+    /**
+     * @param int $id
+     * @return mixed
+     */
     public function getListingByID($id)
     {
+        Validators::assert($id, 'numericint');
+
         $entity = $this->connection->select('*')
                                    ->from($this->getTable())
                                    ->where('listingID = ?', $id)
@@ -152,7 +152,6 @@ class ListingRepository extends BaseRepository
 
         return $this->createEntity($entity);
     }
-
 
     /**
      * @param int $userID

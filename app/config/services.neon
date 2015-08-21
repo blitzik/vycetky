@@ -94,7 +94,7 @@ services:
 	userMessageRepository: App\Model\Repositories\UserMessageRepository
 	listingItemRepository: App\Model\Repositories\ListingItemRepository
 	workedHoursRepository: App\Model\Repositories\WorkedHoursRepository
-	InvitationRepository: App\Model\Repositories\InvitationRepository
+	invitationRepository: App\Model\Repositories\InvitationRepository
 	localityRepository: App\Model\Repositories\LocalityRepository
 	listingRepository: App\Model\Repositories\ListingRepository
 	messageRepository: App\Model\Repositories\MessageRepository
