@@ -3,7 +3,6 @@
 namespace App\Model\Time;
 
 use Exceptions\Logic\InvalidArgumentException;
-use Gedmo\ReferenceIntegrity\Mapping\Validator;
 use Nette\Utils\Validators;
 use Nette\Object;
 
