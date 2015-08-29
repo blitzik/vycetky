@@ -46,3 +46,4 @@ app/backup
 /temp/cache
 /temp/sessions
 /tests/temp/*
+/nbproject

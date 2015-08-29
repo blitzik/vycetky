@@ -11,18 +11,10 @@
 
 	<link rel="stylesheet" media="screen" href="{$basePath}/css/screen.css">
 	<link rel="stylesheet" media="screen" href="{$basePath}/css/dashboard.css">
-	<link rel="stylesheet" href="{$basePath}/css/paginator.css">
 	{block head}{/block}
 </head>
 
 <body>
-<script> document.documentElement.className+=' js' </script>
-<script src="{$basePath}/js/jquery.js"></script>
-<script src="{$basePath}/js/netteForms.js"></script>
-<script src="{$basePath}/js/nette.ajax.js"></script>
-<script src="{$basePath}/js/main.js"></script>
-
-{block scripts}{/block}
 
 <div id="container">
     <!--<h1><a href="{*link Listing:overview*}">Správa výčetek</a></h1>-->
@@ -58,9 +50,14 @@
     </div>
 
     <footer id="footer">
-    &copy; 2013 - {date('Y')} Aleš Tichava
+    2013 - {date('Y')} Aleš Tichava
     </footer>
 </div>
-
+{block scripts}
+<script src="{$basePath}/js/jquery.js"></script>
+<script src="{$basePath}/js/netteForms.js"></script>
+<script src="{$basePath}/js/nette.ajax.js"></script>
+<script src="{$basePath}/js/main.js"></script>
+{/block}
 </body>
 </html>

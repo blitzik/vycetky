@@ -1,3 +1,8 @@
+{block scripts}
+{include parent}
+<script src="{$basePath}/js/listing-merge.js"></script>
+{/block}
+
 {block content}
 
 {control listingActionsMenu}
@@ -94,26 +99,6 @@
 {/foreach}
 
 </table>
-
-<script>
-$(function() {
-    $(':checkbox').prop('checked', false);
-
-    $(':checkbox').on('click', function() {
-        var otherItemID = $(this).data('other');
-        var otherItem = $('#rowID-' + otherItemID);
-
-        if (this.checked) {
-            otherItem.find('input[type="checkbox"]').prop('disabled', true);
-            otherItem.fadeOut(400);
-        } else {
-            otherItem.find('input[type="checkbox"]').prop('disabled', false);
-            otherItem.fadeIn(400);
-        }
-    });
-});
-</script>
-
 
 {/form}
 

@@ -124,9 +124,14 @@ class ItemPresenter extends SecurityPresenter
 
         $this->template->itemDate = $this->date;
         $this->template->listing = $this->listing;
-        $this->template->workedHours = $workedHours;
-        $this->template->defaultWorkedHours = $this->itemUpdateFormFactory
-                                                   ->getDefaultTimeValue('workedHours');
+
+        $defaultWorkedHours = $this->itemUpdateFormFactory
+                                   ->getDefaultTimeValue('workedHours');
+
+        $this->template
+             ->workedHours = $workedHours === null ?
+                             (new \InvoiceTime($defaultWorkedHours))->toTimeWithComma() :
+                             $workedHours->toTimeWithComma();
     }
 
     public function handleSearchLocality($term)
@@ -145,6 +150,8 @@ class ItemPresenter extends SecurityPresenter
     protected function createComponentItemForm()
     {
         $form = $this->itemUpdateFormFactory->create();
+
+        $form['locality']->setAttribute('data-locality-auto-signal', $this->link('searchLocality!'));
 
         $form->onSuccess[] = [$this, 'processSaveItem'];
 

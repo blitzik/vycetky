@@ -1,3 +1,8 @@
+{block scripts}
+{include parent}
+<script src="{$basePath}/js/field-autofocus.js"></script>
+{/block}
+
 {block content}
 
 <h2 n:block="title">Správa napovídání pracovišť</h2>
@@ -27,16 +32,7 @@
             <td colspan="3">Zadanému kritériu neodpovídají žádné záznamy</td>
         </tr>
     {/if}
-    <script>
-    $(function () {
-        var SearchInput = $('#search');
-        var strlen = SearchInput.val().length * 2;
-        SearchInput.focus();
-        SearchInput[0].setSelectionRange(strlen, strlen);
 
-        checkAllFunc();
-    });
-    </script>
     {/snippet}
 </table>
 {else}

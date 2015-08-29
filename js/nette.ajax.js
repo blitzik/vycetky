@@ -501,10 +501,11 @@ $.nette.ext('spinner', {
         return $('<div>', {
             id: 'ajax-spinner',
             css: {
-                display: 'none',
-                position: 'fixed',
+                display: 'none'
+                //position: 'fixed',
+				/*top: '-50%',
                 left: '50%',
-                right: '50%'
+                right: '50%'*/
             }
         });
     },

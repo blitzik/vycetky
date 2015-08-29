@@ -2,6 +2,7 @@
 
 namespace App\Model\Components;
 
+use Nette\Application\LinkGenerator;
 use Nette\Application\UI\Form;
 use Nette\Utils\Json;
 
@@ -20,9 +21,17 @@ class ItemUpdateFormFactory
      */
     private $defaultItemTime;
 
-    public function __construct(array $defaultItemTime)
-    {
+    /**
+     * @var LinkGenerator
+     */
+    private $linkGenerator;
+
+    public function __construct(
+        array $defaultItemTime,
+        LinkGenerator $linkGenerator
+    ) {
         $this->defaultItemTime = $defaultItemTime;
+        $this->linkGenerator = $linkGenerator;
     }
 
     /**

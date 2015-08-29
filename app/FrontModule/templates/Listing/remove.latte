@@ -1,3 +1,8 @@
+{block scripts}
+{include parent}
+<script src="{$basePath}/js/listing-remove.js"></script>
+{/block}
+
 {block content}
 
 {control listingActionsMenu}
@@ -35,24 +40,5 @@
       výčetka nenávratně vymaže ze systému. Smazáním výčetky
       taktéž přijdete o všechny položky, které tato výčetka obsahovala.</p>
 </div>
-
-<script>
-$(function () {
-    var deleteButton = $('#listing-remove-button');
-    var checkInput = $('#listing-check-input');
-
-    deleteButton.attr('disabled', true);
-
-    checkInput.keyup(function () {
-        var self = $(this);
-        if (self.val() == 'smazat') {
-            deleteButton.attr('disabled', false);
-        } else {
-            deleteButton.attr('disabled', true);
-        }
-    });
-
-});
-</script>
 
 {/block}
