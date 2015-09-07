@@ -1,5 +1,10 @@
 {block title}Detail výčetky {$listing->entireDescription()}{/block}
 
+{block scripts}
+{include parent}
+<script src="{$basePath}/js/items-tabl.js"></script>
+{/block}
+
 {block content}
 
 {control listingActionsMenu}

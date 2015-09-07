@@ -9,13 +9,6 @@ function debounce(fn, delay) {
     };
 }
 
-function checkAllFunc()
-{
-    $("#checkAll").change(function () {
-        $(".itemToCheck").prop('checked', $(this).prop("checked"));
-    });
-}
-
 $(function () {
     $.nette.init();
 });

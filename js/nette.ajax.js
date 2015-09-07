@@ -514,4 +514,35 @@ $.nette.ext('spinner', {
     counter: 0
 });
 
+/**
+ * Conditional including of extensions
+ *
+ * @param string name
+ * @param object events
+ * @param object context
+ */
+function addConditionalExtension(name, events, context) {
+    $.nette.ext(name, $.extend(events, {
+        prepare: function (settings) {
+            var ajaxOn = settings.nette.el.data('ajax-on');
+
+            if ( !settings.nette || !ajaxOn instanceof Array || $.inArray(name, ajaxOn) < 0 ) {
+                if ( !settings.off ) {
+                    settings.off = [];
+                }
+
+                settings.off.push(name);
+            }
+        }
+    }), context)
+}
+
+$.nette.ext('allItemsCheck', {
+    load: function (requestHandler) {
+        $("#checkAll").change(function () {
+            $(".itemToCheck").prop('checked', $(this).prop("checked"));
+        });
+    }
+});
+
 })(window, window.jQuery);

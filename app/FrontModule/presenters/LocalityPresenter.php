@@ -2,10 +2,12 @@
 
 namespace App\FrontModule\Presenters;
 
+use Nette\Application\Responses\JsonResponse;
 use Nette\Forms\Controls\SubmitButton;
 use App\Model\Facades\LocalityFacade;
 use App\Model\Entities\Locality;
 use Nette\Application\UI\Form;
+use Tracy\Debugger;
 
 class LocalityPresenter extends SecurityPresenter
 {
@@ -49,19 +51,22 @@ class LocalityPresenter extends SecurityPresenter
     protected function createComponentLocalitiesTableForm()
     {
         $form = new Form();
+        $form->getElementPrototype()->id = 'localities-form';
 
         $form->addText('search', 'Filtr:', 10)
                 ->setHtmlId('search');
 
         $form->addSubmit('hide', 'Odebrat označené')
-                ->setAttribute('class', 'ajax')
+                ->setAttribute('class', 'submitButton')
                 ->onClick[] = [$this, 'processHide'];
 
         $form->addSubmit('filter', 'Vyhledej')
-                ->setAttribute('class', 'ajax')
+                ->setAttribute('class', 'submitButton')
                 ->onClick[] = [$this, 'processFilter'];
 
         $form->addProtection();
+
+        //$form->getElementPrototype()->class = "ajax";
 
         return $form;
     }
@@ -94,10 +99,26 @@ class LocalityPresenter extends SecurityPresenter
         $values = $button->getForm()->getValues();
         $this->localities = $this->localityFacade->findLocalities($values['search'], self::VISIBLE_LOCALITIES);
         $this->search = $values['search'];
+
         if ($this->isAjax()) {
             $this->redrawControl('localitiesList');
         } else {
             $this->redirect('Locality:itemAutocomplete');
+        }
+    }
+
+    /**
+     * @Actions ItemAutocomplete
+     */
+    public function handleSearchLocalities($search)
+    {
+        $this->localities = $this->localityFacade->findLocalities($search, self::VISIBLE_LOCALITIES);
+        $this->search = $search;
+
+        if ($this->isAjax()) {
+            $this->redrawControl('localitiesList');
+        } else {
+            $this->redirect('this');
         }
     }
 
