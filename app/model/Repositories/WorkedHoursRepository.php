@@ -57,12 +57,23 @@ class WorkedHoursRepository extends BaseRepository
                    'otherHours' => $workedHours->otherHours->getTime()];
 
         try {
-            $this->connection
-                 ->query('INSERT INTO [worked_hours]', $values, '
-                          ON DUPLICATE KEY UPDATE
-                          workedHoursID = LAST_INSERT_ID(workedHoursID)');
+            $this->connection->query('LOCK TABLES worked_hours WRITE');
+            $data = $this->connection->query(
+                'SELECT workedHoursID AS id FROM worked_hours
+                 WHERE %and', $values
+            )->fetch();
 
-            $id = $this->connection->getInsertId();
+            if ($data === false) {
+                $this->connection->query(
+                    'INSERT INTO [worked_hours]', $values
+                );
+
+                $id = $this->connection->getInsertId();
+            } else {
+                $id = $data['id'];
+            }
+            $this->connection->query('UNLOCK TABLES');
+
             if (!$workedHours->isDetached()) {
                 $workedHours->detach();
             }
@@ -73,6 +84,7 @@ class WorkedHoursRepository extends BaseRepository
             return $workedHours;
 
         } catch (\DibiException $e) {
+            $this->connection->query('UNLOCK TABLES');
 
             Debugger::log($e, Debugger::ERROR);
             throw $e;

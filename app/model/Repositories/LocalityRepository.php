@@ -33,7 +33,7 @@ class LocalityRepository extends BaseRepository
      */
     public function findByName($localityName)
     {
-        Validators::assert($localityName, 'string');
+        Validators::assert($localityName, 'unicode');
 
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
@@ -54,7 +54,7 @@ class LocalityRepository extends BaseRepository
      */
     public function findSimilarByName($localityName, $userID, $limit)
     {
-        Validators::assert($localityName, 'string|null');
+        Validators::assert($localityName, 'unicode|null');
         Validators::assert($userID, 'numericint');
         Validators::assert($limit, 'numericint');
 
@@ -168,12 +168,23 @@ class LocalityRepository extends BaseRepository
     public function setupLocality(Locality $locality)
     {
         try {
-            $this->connection
-                 ->query('INSERT INTO [locality]', ['name' => $locality->name],
-                         'ON DUPLICATE KEY UPDATE
-                          localityID = LAST_INSERT_ID(localityID)');
+            $this->connection->query('LOCK TABLES [locality] write');
+            $data = $this->connection->query(
+                'SELECT localityID AS id FROM [locality]
+                 WHERE name = ?', $locality->name
+            )->fetch();
 
-            $id = $this->connection->getInsertId();
+            if ($data === false) { // locality does not exists
+                $this->connection->query(
+                    'INSERT INTO [locality]', ['name' => $locality->name]
+                );
+
+                $id = $this->connection->getInsertId();
+            } else {
+                $id = $data['id'];
+            }
+            $this->connection->query('UNLOCK TABLES');
+
             if (!$locality->isDetached()) {
                 $locality->detach();
             }
@@ -184,6 +195,7 @@ class LocalityRepository extends BaseRepository
             return $locality;
 
         } catch (\DibiException $e) {
+            $this->connection->query('UNLOCK TABLES');
 
             Debugger::log($e, Debugger::ERROR);
             throw $e;
