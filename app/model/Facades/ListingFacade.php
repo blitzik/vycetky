@@ -334,7 +334,7 @@ class ListingFacade extends BaseFacade
         array $ignoredItemsIDs = null
     ) {
         $this->checkListingValidity($listing);
-        Validators::assert($description, 'string');
+        Validators::assert($description, 'unicode');
 
         $listingItems = $listing->listingItems;
 

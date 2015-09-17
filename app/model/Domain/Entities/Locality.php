@@ -28,7 +28,7 @@ class Locality extends BaseEntity
     {
         $localityName = trim($localityName);
 
-        Validators::assert($localityName, 'string:1..40');
+        Validators::assert($localityName, 'unicode:1..40');
         $this->row->name = $localityName;
     }
 }

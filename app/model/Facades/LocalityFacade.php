@@ -58,7 +58,7 @@ class LocalityFacade extends BaseFacade
      */
     public function findLocalities($localityName, $limit, $user = null)
     {
-        Validators::assert($localityName, 'string|null');
+        Validators::assert($localityName, 'unicode|null');
         Validators::assert($limit, 'numericint');
         $userID = $this->getIdOfSignedInUserOnNull($user);
 

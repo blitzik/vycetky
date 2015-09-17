@@ -57,7 +57,7 @@ class User extends BaseEntity
     public function setUsername($username)
     {
         $username = trim($username);
-        Validators::assert($username, 'string:1..25');
+        Validators::assert($username, 'unicode:1..25');
         $this->row->username = $username;
     }
 
@@ -88,7 +88,7 @@ class User extends BaseEntity
         if (!is_null($name)) {
             $name = trim($name);
         }
-        Validators::assert($name, 'string:..70|null');
+        Validators::assert($name, 'unicode:..70|null');
         $this->row->name = $name;
     }
 
@@ -98,7 +98,7 @@ class User extends BaseEntity
     public function setRole($role)
     {
         $role = trim($role);
-        Validators::assert($role, 'string:1..20');
+        Validators::assert($role, 'unicode:1..20');
         $this->row->role = $role;
     }
 

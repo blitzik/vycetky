@@ -98,7 +98,7 @@ class Listing extends BaseEntity
     public function setDescription($description)
     {
         $description = trim($description);
-        Validators::assert($description, 'string:..40|null');
+        Validators::assert($description, 'unicode:..40|null');
         $this->row->description = $description;
     }
 

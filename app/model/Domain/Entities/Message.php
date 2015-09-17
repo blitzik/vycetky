@@ -56,7 +56,7 @@ class Message extends BaseEntity
     private function setSubject($subject)
     {
         $subject = trim($subject);
-        Validators::assert($subject, 'string:1..80');
+        Validators::assert($subject, 'unicode:1..80');
         $this->row->subject = $subject;
     }
 
@@ -66,7 +66,7 @@ class Message extends BaseEntity
     private function setMessage($message)
     {
         $message = trim($message);
-        Validators::assert($message, 'string:1..3000');
+        Validators::assert($message, 'unicode:1..3000');
         $this->row->message = $message;
     }
 

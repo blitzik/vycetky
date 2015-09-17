@@ -83,7 +83,7 @@ class UserRepository extends BaseRepository
      */
     public function findByUsername($username)
     {
-        Validators::assert($username, 'string');
+        Validators::assert($username, 'unicode');
 
         $result = $this->connection->select('*')
                                    ->from($this->getTable())
@@ -105,7 +105,7 @@ class UserRepository extends BaseRepository
      */
     public function checkUsername($username)
     {
-        Validators::assert($username, 'string');
+        Validators::assert($username, 'unicode');
 
         $result = $this->connection->select('*')
                                    ->from($this->getTable())

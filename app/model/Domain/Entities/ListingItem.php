@@ -49,7 +49,7 @@ class ListingItem extends BaseEntity
      */
     public function setDescription($description)
     {
-        Validators::assert($description, 'string:..30|null');
+        Validators::assert($description, 'unicode:..30|null');
         $this->row->description = $description;
     }
 
@@ -70,7 +70,7 @@ class ListingItem extends BaseEntity
      */
     private function setDescOtherHours($descOtherHours)
     {
-        Validators::assert($descOtherHours, 'string:..30|null');
+        Validators::assert($descOtherHours, 'unicode:..30|null');
 
         if (!empty($descOtherHours) and isset($this->row->workedHoursID)) {
             if ($this->workedHours->otherHours->toSeconds() == 0) {
