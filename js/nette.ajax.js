@@ -502,9 +502,9 @@ $.nette.ext('spinner', {
             id: 'ajax-spinner',
             css: {
                 display: 'none',
-                position: 'fixed',
+                /*position: 'fixed',
                 left: '50%',
-                right: '50%'
+                right: '50%'*/
             }
         });
     },
